@@ -13,12 +13,14 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author antti
  */
-public class listParser {
+@Component
+public class ListParser {
     
     @Autowired
     WhitewordDao whiteworddao;
@@ -36,7 +38,7 @@ public class listParser {
         try {
             list_id = wordlistdao.insert(wordlist);
         } catch (SQLException ex) {
-            Logger.getLogger(listParser.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ListParser.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("There was an error while adding the list to the database");
             return;
         }
@@ -60,7 +62,7 @@ public class listParser {
                         //insert word into database
                         blackworddao.insert(line, list_id);
                     } catch (SQLException ex) {
-                        Logger.getLogger(listParser.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(ListParser.class.getName()).log(Level.SEVERE, null, ex);
                         System.out.println("There was an error while adding the words to the database");
                         return;
                     }
@@ -82,7 +84,7 @@ public class listParser {
                         //insert word into database
                         whiteworddao.insert(line, status, list_id);
                     } catch (SQLException ex) {
-                        Logger.getLogger(listParser.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(ListParser.class.getName()).log(Level.SEVERE, null, ex);
                         System.out.println("There was an error while adding the words to the database");
                         return;
                     }
