@@ -1,5 +1,6 @@
 package passwordapplication;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -13,6 +14,9 @@ public class Textinterface {
     
     @Autowired
     InitializeDB initializeDB;
+    
+    @Autowired
+    ListParser listparser;    
 
     public void start(Scanner input) {
         while (true) {
@@ -35,9 +39,7 @@ public class Textinterface {
             } 
             
             else if (command.equals("a")) {
-                System.out.println("The words in the list need to be each on it's own line");
-                System.out.println("Please give the location of the wordlist file");
-                String location = input.nextLine();
+                System.out.println("Please note:\nThe words in the list need to be each on it's own line");
                 System.out.println("Please give the list a name");
                 String name = input.nextLine();
                 Boolean blacklist = null;
@@ -53,10 +55,26 @@ public class Textinterface {
                             blacklist = true;
                         }
                         else {
-                            System.out.println("Input not recognized as [y/n]");
+                            System.out.println("Input not recognized as [y/n]\nPlease try again");
                         }
                 }
-                    listParser.addList(name, location, blacklist);
+
+                String location = null; 
+                while(true) {
+                        System.out.println("Please give the location of the wordlist file");
+                        location = input.nextLine();
+                        File f = new File(location);
+                        if(f.exists() && !f.isDirectory()) {
+                            break;
+                        }
+                }
+                
+                try {
+                    listparser.addList(name, location, blacklist);
+                } catch (IOException ex) {
+                    System.out.println("File not found.");
+                }
+                
                     
 
             } 
