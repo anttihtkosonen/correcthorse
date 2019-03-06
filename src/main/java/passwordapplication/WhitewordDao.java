@@ -1,11 +1,13 @@
 package passwordapplication;
 
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -38,6 +40,10 @@ public class WhitewordDao {
         return word;
     }
     
+    public void deleteListWords (Integer list_id){
+        jdbcTemplate.update("DELETE FROM Whiteword WHERE list_id = ?", list_id);
+    }
+    
     //method to change all instances of word inactive in table
     public void setInactive (String word) {
         jdbcTemplate.update("UPDATE Whiteword SET active = false WHERE word = ?", word);
@@ -47,6 +53,21 @@ public class WhitewordDao {
     public void setActive (String word) {
         jdbcTemplate.update("UPDATE Whiteword SET active = true WHERE word = ?", word);        
     }
+    
+
+    public List<String> listTenStringsFromList(Integer list_id) throws SQLException {
+        
+        List<String> stringlist = jdbcTemplate.query(
+                "SELECT word FROM Whiteword WHERE list_id = ? LIMIT 10", 
+                new RowMapper<String>(){
+                public String mapRow(ResultSet rs, int rowNum)
+                    throws SQLException {
+                        return rs.getString(1);
+                    }
+                }, list_id);
+        return stringlist;    
+    }    
+
     
     //method to retrieve n usable strings from database
     public List<String> listNActiveStrings(Integer n) throws SQLException {

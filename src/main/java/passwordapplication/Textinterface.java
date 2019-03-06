@@ -16,11 +16,14 @@ public class Textinterface {
     InitializeDB initializeDB;
     
     @Autowired
-    ListParser listparser;    
+    ListParser listparser;
+    
+    @Autowired
+    ShowList showlist;
 
     public void start(Scanner input) {
         while (true) {
-            System.out.println("Commands: ");
+            System.out.println("\n\n\nCommands: ");
             System.out.println(" x - exit");
             System.out.println(" g - generate passwords");
             System.out.println(" a - add wordlist");
@@ -43,7 +46,7 @@ public class Textinterface {
                 System.out.println("Please give the list a name");
                 String name = input.nextLine();
                 Boolean blacklist = null;
-                while (blacklist = null){
+                while (blacklist == null){
                     System.out.println("Is this a blacklist? [y/n]");
                     String activestring = input.nextLine();
                         if (activestring.toLowerCase().equals("y") ||
@@ -52,7 +55,7 @@ public class Textinterface {
                         }
                         else if (activestring.toLowerCase().equals("n") ||
                             activestring.toLowerCase().equals("no")){
-                            blacklist = true;
+                            blacklist = false;
                         }
                         else {
                             System.out.println("Input not recognized as [y/n]\nPlease try again");
@@ -67,6 +70,7 @@ public class Textinterface {
                         if(f.exists() && !f.isDirectory()) {
                             break;
                         }
+                        System.out.println("\nFile not found!\n");
                 }
                 
                 try {
@@ -80,11 +84,20 @@ public class Textinterface {
             } 
             
             else if (command.equals("s")) {
-                System.out.println("Not implemented yet");
+                try {
+                    showlist.showAll();
+                }
+                catch (SQLException ex){
+                    Logger.getLogger(ListParser.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
             } 
             
             else if (command.equals("r")) {
-                System.out.println("Not implemented yet");
+                System.out.println("Please give the id number of the list to be removed");
+                String idString = input.nextLine();
+                int id = Integer.parseInt(idString);
+                
             } 
             
             else if (command.equals("d")) {

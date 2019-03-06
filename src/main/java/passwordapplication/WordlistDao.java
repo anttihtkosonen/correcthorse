@@ -35,7 +35,6 @@ public class WordlistDao {
         return id;
     }
     
- 
     public Wordlist read(Integer id) throws SQLException {
         Wordlist wordlist = jdbcTemplate.queryForObject(
                 "SELECT * FROM Wordlist WHERE id = ?",
@@ -45,6 +44,9 @@ public class WordlistDao {
         return wordlist;
     }
 
+    public void deleteList (Integer list_id){
+        jdbcTemplate.update("DELETE FROM Wordlist WHERE id = ?", list_id);
+    }
 
     public List<Wordlist> list() throws SQLException {
 
@@ -58,6 +60,8 @@ public class WordlistDao {
         return wordlist;
 
     }
+    
+
     
 
     

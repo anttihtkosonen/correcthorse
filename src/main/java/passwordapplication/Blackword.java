@@ -2,6 +2,7 @@ package passwordapplication;
 
 
 public class Blackword {
+    Integer id;
     String word;
     Wordlist wordlist;
     
@@ -9,10 +10,12 @@ public class Blackword {
     }   
     
     
-    public Blackword(String word,  Wordlist wordlist){
+    public Blackword(Integer id, String word,  Wordlist wordlist){
+        this.id = id;
         this.word = word;
         this.wordlist = wordlist;
     }
+    
 
     public String getWord() {
         return this.word;
