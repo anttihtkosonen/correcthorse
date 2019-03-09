@@ -3,7 +3,9 @@ package passwordapplication;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -40,6 +42,16 @@ public class WhitewordDao {
         return word;
     }
     
+    public Pair readNameAndActive(Integer id) throws SQLException {
+        Pair result = jdbcTemplate.queryForObject(
+                "SELECT word, active FROM Whiteword WHERE id = ?",
+                (rs, rowNum) -> new Pair(
+                        rs.getString("word"), 
+                        rs.getBoolean("active")), id);
+        return result;
+
+    }
+    
     public void deleteListWords (Integer list_id){
         jdbcTemplate.update("DELETE FROM Whiteword WHERE list_id = ?", list_id);
     }
@@ -70,28 +82,34 @@ public class WhitewordDao {
 
     
     //method to retrieve n usable strings from database
-    public List<String> listNActiveStrings(Integer n) throws SQLException {
+    public ArrayList<String> listNActiveStrings(Integer n) throws SQLException {
 	Integer maxId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM Whiteword", Integer.class);
 
-        List<String> list = null; 
-        while (list.size() < n) {
+        ArrayList<String> list = null; 
+        int m = 0;
+        while (m < n) {
             int id = (int) (Math.random()*maxId);
-            Whiteword word = this.read(id);
-            Boolean active = word.getActive();
-            String wordString = word.getWord();
+            
+            Pair word = this.readNameAndActive(id);
+            Boolean active = (Boolean) word.getValue();
+            String wordString = (String) word.getKey();
             
             //Check if word is active (not on blacklist) - if not, go to next iteration
             if (active) {
                 //Iterate through the list of words drawn before, ignore this word if it is on list already
                 Boolean ok = true;
-                for (int i = 0; i < list.size(); i++) {
-                    if (list.get(i) == wordString) {
-                        ok = false;
+                if (list != null) {
+                    for (int i = 0; i < list.size(); i++) {
+                        if (list.get(i) == wordString) {
+                            ok = false;
+                        }
                     }
                 }
+            
                 //if word is not on list, add it
                 if(ok) {
                     list.add(wordString);
+                    m++;
                 }
             }
         
