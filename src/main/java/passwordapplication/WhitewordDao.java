@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -85,12 +86,21 @@ public class WhitewordDao {
     public ArrayList<String> listNActiveStrings(Integer n) throws SQLException {
 	Integer maxId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM Whiteword", Integer.class);
 
-        ArrayList<String> list = null; 
+        ArrayList<String> list = new ArrayList<String>(); 
         int m = 0;
         while (m < n) {
-            int id = (int) (Math.random()*maxId);
+            Pair word;
+            do {
+                try {
+                    int id = (int) (Math.random()*maxId);
+                    word = this.readNameAndActive(id);
+                    break;
+                }
+                catch (EmptyResultDataAccessException e) {
+                }
+            } while(true);    
+                
             
-            Pair word = this.readNameAndActive(id);
             Boolean active = (Boolean) word.getValue();
             String wordString = (String) word.getKey();
             
@@ -98,13 +108,12 @@ public class WhitewordDao {
             if (active) {
                 //Iterate through the list of words drawn before, ignore this word if it is on list already
                 Boolean ok = true;
-                if (list != null) {
-                    for (int i = 0; i < list.size(); i++) {
-                        if (list.get(i) == wordString) {
-                            ok = false;
-                        }
+                for (int i = 0; i < list.size(); i++) {
+                    if (list.get(i) == wordString) {
+                        ok = false;
                     }
                 }
+                
             
                 //if word is not on list, add it
                 if(ok) {
