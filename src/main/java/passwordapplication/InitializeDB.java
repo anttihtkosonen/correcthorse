@@ -12,10 +12,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.stereotype.Component;
 
+/**
+ * Class for initializing the database. All tables are dropped, and then created
+ * again. Use of initialize() deletes all data in database.
+ *
+ * @author antti
+ */
 @Component
 public class InitializeDB {
-    
-    
+
     public static void initialize() {
 
         try (Connection conn = DriverManager.getConnection("jdbc:h2:.//database/passwordDB", "sa", "")) {
@@ -29,6 +34,6 @@ public class InitializeDB {
         } catch (SQLException ex) {
             Logger.getLogger(Passwordapplication.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }   
+    }
 
 }

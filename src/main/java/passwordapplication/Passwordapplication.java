@@ -6,6 +6,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * The main class of the application. Used for starting the program.
+ *
+ * @author antti
+ */
 @SpringBootApplication
 public class Passwordapplication implements CommandLineRunner {
 

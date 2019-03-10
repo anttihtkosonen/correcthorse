@@ -1,6 +1,12 @@
 package passwordapplication;
 
-
+/**
+ * Whiteword is the entity used for words that are used to generate passwords
+ * The object includes the word, the information about whether it can be used 
+ * for passwords and the wordlist it is connected to.
+ * This class has only standard getters and setters.
+ * @author antti
+ */
 public class Whiteword {
     String word;
     Boolean active;
