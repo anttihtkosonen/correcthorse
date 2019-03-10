@@ -22,18 +22,26 @@ public class Whiteword {
         this.wordlist = wordlist;
     }
 
+    public void setWord(String word) {
+        this.word = word;
+    }
+    
     public String getWord() {
         return this.word;
+    }
+    
+    public void setActive(Boolean active) {
+        this.active = active;
     }
     
     public Boolean getActive() {
         return this.active;
     }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
     
+    public void setWordlist(Wordlist wordlist) {
+        this.wordlist = wordlist;
+    }
+
     public Wordlist getWordlist() {
         return this.wordlist;
     }

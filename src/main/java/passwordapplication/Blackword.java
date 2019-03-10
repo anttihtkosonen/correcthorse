@@ -20,8 +20,16 @@ public class Blackword {
         this.wordlist = wordlist;
     }
 
+    public void setWord(String word) {
+        this.word = word;
+    }
+    
     public String getWord() {
         return this.word;
+    }
+    
+    public void setWordlist(Wordlist wordlist) {
+        this.wordlist = wordlist;
     }
 
     public Wordlist getWordlist() {

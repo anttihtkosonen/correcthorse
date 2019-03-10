@@ -1,4 +1,5 @@
 Correcthorse: a program to generate strong passwords from wordlists
+
 Written in Java 8 for Linux-systems by Antti Kosonen. 
 Licence: GNU General Public License v2.0
 

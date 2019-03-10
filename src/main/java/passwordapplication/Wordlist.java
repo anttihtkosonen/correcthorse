@@ -44,8 +44,4 @@ public class Wordlist {
         return this.blacklist;
     }
 
-    public void setBlacklist(Boolean blacklist) {
-        this.blacklist = blacklist;
-    }
-
 }

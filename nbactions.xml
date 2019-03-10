@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-JaCoCo coverage</actionName>
+            <displayName>JaCoCo coverage</displayName>
+            <goals>
+                <goal>org.jacoco:jacoco-maven-plugin:0.8.2:report</goal>
+            </goals>
+        </action>
+    </actions>
