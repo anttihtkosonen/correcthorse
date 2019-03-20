@@ -1,15 +1,20 @@
-package passwordapplication;
+package passwordapplication.services;
 
+import passwordapplication.dao.BlackwordDao;
+import passwordapplication.dao.WhitewordDao;
+import passwordapplication.dao.WordlistDao;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import passwordapplication.domain.Wordlist;
 
 /**
  * Class for list operations: adding list to and removing lists from database
@@ -39,9 +44,9 @@ public class ListParser {
      * @throws FileNotFoundException if the textfile is not found
      * @throws IOException
      */
-    public void addList(String name, String location, Boolean blacklist) throws FileNotFoundException, IOException {
+    public void addList(String name, String location, Timestamp timestamp, Boolean blacklist) throws FileNotFoundException, IOException {
         //Add list information to database (to the wordlist-table)
-        Wordlist wordlist = new Wordlist(name, blacklist);
+        Wordlist wordlist = new Wordlist(name, timestamp, blacklist);
         int list_id = 0;
         try {
             list_id = wordlistdao.insert(wordlist);
@@ -108,7 +113,7 @@ public class ListParser {
     /**
      * Method to remove a list from the database
      *
-     * @param id - id-number (wordlist-table primary key) of the list to be
+     * @param id - id-number (Wordlist-table primary key) of the list to be
      * removed
      * @throws SQLException
      */

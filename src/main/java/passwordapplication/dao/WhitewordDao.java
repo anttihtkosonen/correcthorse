@@ -1,4 +1,4 @@
-package passwordapplication;
+package passwordapplication.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import passwordapplication.domain.Whiteword;
 
 /**
  * Whiteworddao is the class that handles the database operations for the
@@ -189,6 +190,14 @@ public class WhitewordDao {
 
         }
         return list;
+    }
+    
+    public Integer getListSize(Integer list_id) {
+        Integer size = jdbcTemplate.queryForObject(
+                "SELECT COUNT (*) FROM Whiteword WHERE list_id = ?",
+                Integer.class,
+                list_id);
+        return size;
     }
 
 }

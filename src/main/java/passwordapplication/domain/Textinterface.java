@@ -1,8 +1,13 @@
-package passwordapplication;
+package passwordapplication.domain;
 
+import passwordapplication.services.ListParser;
+import passwordapplication.services.ShowList;
+import passwordapplication.services.PasswordGenerator;
+import passwordapplication.services.InitializeDB;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -34,6 +39,10 @@ public class Textinterface {
     @Autowired
     PasswordGenerator passwordgenerator;
 
+    /**
+     * Method that gets user input and calls the appropriate method accordingly
+     * @param input Scanner-object for getting user input.
+     */
     public void start(Scanner input) {
         while (true) {
             System.out.println("\n\n\nCommands: ");
@@ -64,6 +73,10 @@ public class Textinterface {
         }
     }
 
+    /**
+     * Method for adding a Wordlist
+     * @param input Scanner-object for getting user input.
+     */
     public void add(Scanner input) {
         System.out.println("Please note:\nThe words in the list need to be each on it's own line");
         System.out.println("Please give the list a name");
@@ -93,22 +106,40 @@ public class Textinterface {
             }
             System.out.println("\nFile not found!\n");
         }
-
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         try {
-            listparser.addList(name, location, blacklist);
+            listparser.addList(name, location, timestamp, blacklist);
         } catch (IOException ex) {
             System.out.println("File not found.");
         }
         return;
     }
 
+    /**
+     * Method for generating passwords
+     * @param input Scanner-object for getting user input.
+     */
     public void generate(Scanner input) {
         System.out.println("How many passwords do you want to generate?");
         String amountString = input.nextLine();
         Integer amount = Integer.parseInt(amountString);
-        List<String> passwords = null;
+        System.out.println("How many words per password?");
+        String wordnumberString = input.nextLine();
+        Integer wordnumber = Integer.parseInt(wordnumberString);
+        System.out.println("What characters do you want to use between words?");
+        System.out.println("You can add as many as you like, press enter when done");
+        List<String> dividers = new ArrayList();
+        while (true) {
+            String divider = input.nextLine();
+            if (divider.isEmpty()){
+                break;
+            } else {
+                dividers.add(divider);
+            }
+        }
+        List<String> passwords = new ArrayList();
         try {
-            passwords = passwordgenerator.getPasswords(amount);
+            passwords = passwordgenerator.getPasswords(amount, wordnumber, dividers);
         } catch (SQLException ex) {
             System.out.println("There was an error while generating passwords");
         }
@@ -118,6 +149,9 @@ public class Textinterface {
         return;
     }
 
+    /**
+     * Method for showing the lists in the database
+     */
     public void show() {
         try {
             showlist.showAll();
@@ -127,6 +161,10 @@ public class Textinterface {
         return;
     }
 
+    /**
+     * Method for removing lists from database
+     * @param input Scanner-object for getting user input.
+     */
     public void remove(Scanner input) {
         do {
             try {
@@ -145,6 +183,10 @@ public class Textinterface {
         return;
     }
 
+    /**
+     * Method for clearing the database
+     * @param input Scanner-object for getting user input.
+     */
     public void deleteDB(Scanner input) {
         System.out.println("All data in database will be lost.\nAre you sure, that you want to do that? [y/N]");
         String confirmation = input.nextLine();

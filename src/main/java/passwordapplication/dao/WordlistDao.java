@@ -1,4 +1,4 @@
-package passwordapplication;
+package passwordapplication.dao;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -10,10 +10,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import passwordapplication.domain.Wordlist;
 
 /**
  * Wordlistdao is the class that handles the database operations for the
- * wordlist-table, which hosts the information about the wordlists added by the
+ * Wordlist-table, which hosts the information about the wordlists added by the
  * user. blacklist.
  *
  * @author antti
@@ -25,22 +26,26 @@ public class WordlistDao {
     JdbcTemplate jdbcTemplate;
 
     /**
-     * Method for adding a wordlist-object to the table
+     * Method for adding a Wordlist-object to the table
      *
-     * @param wordlist - the wordlist-object to be added.
+     * @param wordlist - the Wordlist-object to be added.
      * @return the primary key of the added list
      * @throws SQLException
      */
     public Integer insert(Wordlist wordlist) throws SQLException {
+        /**
+         * A Keyholder is created for storing the id of the created sql-row.
+         */
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(
                     "INSERT INTO Wordlist"
-                    + " (name, blacklist)"
-                    + " VALUES (?, ?)",
+                    + " (name, timestamp, blacklist)"
+                    + " VALUES (?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, wordlist.getName());
-            stmt.setBoolean(2, wordlist.getBlacklist());
+            stmt.setTimestamp(2, wordlist.getTimestamp());
+            stmt.setBoolean(3, wordlist.getBlacklist());
             return stmt;
         }, keyHolder);
         int id = keyHolder.getKey().intValue();
@@ -48,10 +53,10 @@ public class WordlistDao {
     }
 
     /**
-     * Method for reading a word from the table into a wordlist-object
+     * Method for reading a word from the table into a Wordlist-object
      *
      * @param id - id (primary key) of the list to be read
-     * @return wordlist-object
+     * @return Wordlist-object
      * @throws SQLException
      */
     public Wordlist read(Integer id) throws SQLException {
@@ -62,9 +67,11 @@ public class WordlistDao {
 
         return wordlist;
     }
+    
+
 
     /**
-     * Method to delete wordlist from database. Please note, that this method
+     * Method to delete Wordlist from database. Please note, that this method
      * only deletes the information of the list, and not the words on that list.
      *
      * @param list_id - id (primary key) of the list to be delete.
@@ -76,7 +83,7 @@ public class WordlistDao {
     /**
      * Method to list the wordlists in the database.
      *
-     * @return List of wordlist-objects
+     * @return List of Wordlist-objects
      * @throws SQLException
      */
     public List<Wordlist> list() throws SQLException {
@@ -86,7 +93,7 @@ public class WordlistDao {
                 (rs, rowNum) -> new Wordlist(
                         rs.getInt("id"),
                         rs.getString("name"),
-                        //                  rs.getTimestamp("datetime"),
+                        rs.getTimestamp("timestamp"),
                         rs.getBoolean("blacklist")));
         return wordlist;
 

@@ -1,4 +1,4 @@
-package passwordapplication;
+package passwordapplication.domain;
 
 import java.util.Scanner;
 import org.springframework.beans.factory.annotation.Autowired;

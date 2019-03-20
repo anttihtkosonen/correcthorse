@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package passwordapplication;
+package passwordapplication.domain;
 
+import passwordapplication.domain.Whiteword;
+import passwordapplication.domain.Wordlist;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

@@ -1,8 +1,10 @@
-package passwordapplication;
+package passwordapplication.services;
 
+import passwordapplication.dao.WhitewordDao;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +18,6 @@ public class PasswordGenerator {
     /**
      * The number of words that are used to create a password.
      */
-    Integer wordnumber = 3;
     
     @Autowired
     WhitewordDao whiteworddao;
@@ -28,21 +29,26 @@ public class PasswordGenerator {
      * @param amount - number of passwords to generate
      * @return List of strings
      */    
-    public List<String> getPasswords (Integer amount) throws SQLException{
+    public List<String> getPasswords (Integer amount, Integer wordnumber, List<String> dividers) throws SQLException{
         //First get the needed number of active words from database
         ArrayList<String> words = whiteworddao.listNActiveStrings(wordnumber * amount);
-        List<String> passwords = this.generate(amount, words);
+        // If user gave no dividers, use line
+        if (dividers.isEmpty()){
+            dividers.add("-");
+        }
+        //get passwprds
+        List<String> passwords = this.generate(amount, wordnumber, words, dividers);
         return passwords;
     }
     
     
     /**
-     * Method to generate passwords from given list of strings
+     * Method to generate passwords from given lists of strings and dividers
      *
      * @param amount - number of passwords to generate
      * @return List of strings
      */
-    public List<String> generate(Integer amount, ArrayList<String> words) {
+    public List<String> generate(Integer amount, Integer wordnumber, ArrayList<String> words, List<String> dividers) {
         
         //Initialize the list of passwords
         List<String> passwords = new ArrayList<String>();
@@ -51,7 +57,9 @@ public class PasswordGenerator {
         for (int i = 0; i < amount; i++) {
             String password = words.remove(0);
             for (int j = 1; j < wordnumber; j++) {
-                password += "-";
+                Random rand = new Random();
+                String divider = dividers.get(rand.nextInt(dividers.size()));
+                password += divider;
                 password += words.remove(0);
             }
             passwords.add(password);

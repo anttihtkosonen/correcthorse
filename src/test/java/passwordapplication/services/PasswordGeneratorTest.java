@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package passwordapplication;
+package passwordapplication.services;
 
+import passwordapplication.services.PasswordGenerator;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.After;
@@ -30,6 +31,9 @@ public class PasswordGeneratorTest {
     public void testGenerate() {
         System.out.println("generate");
         Integer amount = 2;
+        Integer wordnumber = 3;
+        ArrayList<String> dividers = new ArrayList();
+        dividers.add("-");
         ArrayList<String> words = new ArrayList();
         words.add("bashment");
         words.add("bawbee");
@@ -45,7 +49,7 @@ public class PasswordGeneratorTest {
         expResult.add("bergschrund-bezoar-bibliopole");
 
         
-        List<String> result = instance.generate(amount, words);
+        List<String> result = instance.generate(amount, wordnumber, words, dividers);
         assertEquals(expResult, result);
 
 

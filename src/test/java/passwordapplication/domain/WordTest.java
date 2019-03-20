@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package passwordapplication;
+package passwordapplication.domain;
 
+import passwordapplication.domain.Word;
+import passwordapplication.domain.Wordlist;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -16,9 +18,9 @@ import static org.junit.Assert.*;
  *
  * @author antti
  */
-public class BlackwordTest {
+public class WordTest {
     
-    public BlackwordTest() {
+    public WordTest() {
     }
     
     @BeforeClass
@@ -38,12 +40,12 @@ public class BlackwordTest {
     }
 
     /**
-     * Test of setWord and getWord method, of class Blackword.
+     * Test of setWord and getWord method, of class Word.
      */
     @Test
     public void testSetGetWord() {
         System.out.println("getWord");
-        Blackword instance = new Blackword();
+        Word instance = new Word();
         instance.setWord("testword");
         String expResult = "testword";
         String result = instance.getWord();
@@ -51,13 +53,13 @@ public class BlackwordTest {
     }
 
     /**
-     * Test of setWordlist and getWordlist method, of class Blackword.
+     * Test of setWordlist and getWordlist method, of class Word.
      */
 
     @Test
     public void testSetGetWordlist() {
         System.out.println("getWordlist");
-        Blackword instance = new Blackword();
+        Word instance = new Word();
         Wordlist wordlist = new Wordlist();
         Wordlist expResult = wordlist;
         instance.setWordlist(wordlist);

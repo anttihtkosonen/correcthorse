@@ -1,4 +1,4 @@
-package passwordapplication;
+package passwordapplication.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import passwordapplication.domain.Word;
 
 /**
  * Blackworddao is the class that handles the database operations for the
@@ -22,12 +23,12 @@ public class BlackwordDao {
     JdbcTemplate jdbcTemplate;
 
     /**
-     * Method for adding a word-object to the table
+     * Method for adding a word-object to the Blackword-table
      *
-     * @param word - The blackword-object to be added
+     * @param word - The word-object to be added
      * @throws SQLException
      */
-    public void insert(Blackword word) throws SQLException {
+    public void insert(Word word) throws SQLException {
         jdbcTemplate.update("INSERT INTO Blackword"
                 + " (blackword, list_id)"
                 + " VALUES (?, ?)",
@@ -57,9 +58,9 @@ public class BlackwordDao {
      * @return blackword-object
      * @throws SQLException
      */
-    public Blackword read(Integer id) throws SQLException {
-        Blackword blackword = jdbcTemplate.queryForObject("SELECT * FROM Blackword WHERE id = ?",
-                new BeanPropertyRowMapper<>(Blackword.class),
+    public Word read(Integer id) throws SQLException {
+        Word blackword = jdbcTemplate.queryForObject("SELECT * FROM Blackword WHERE id = ?",
+                new BeanPropertyRowMapper<>(Word.class),
                 id);
 
         return blackword;
@@ -75,7 +76,7 @@ public class BlackwordDao {
     }
 
     /**
-     * Method to find whether a word (string) exists in the blackword-table
+     * Method to find whether a word (string) exists in the Blackword-table
      *
      * @param word - string to find
      * @return - true if word exists in the table, false if not
@@ -98,7 +99,6 @@ public class BlackwordDao {
      * @return number of times found
      */
     public Integer count(String word) {
-        //method to get the count of instances of word
         Integer count;
         count = jdbcTemplate.queryForObject(
                 "SELECT COUNT (*) FROM Blackword WHERE word = ?",
@@ -110,7 +110,7 @@ public class BlackwordDao {
     /**
      * Method to list the words belonging to list with id list_id
      *
-     * @param list_id - wordlist to list from
+     * @param list_id - Wordlist to list from
      * @return List of strings
      * @throws SQLException
      */
@@ -140,5 +140,13 @@ public class BlackwordDao {
             }
         }, list_id);
         return stringlist;
+    }
+    
+    public Integer getListSize(Integer list_id) {
+        Integer size = jdbcTemplate.queryForObject(
+                "SELECT COUNT (*) FROM Blackword WHERE list_id = ?",
+                Integer.class,
+                list_id);
+        return size;
     }
 }
