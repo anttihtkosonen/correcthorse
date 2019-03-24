@@ -1,6 +1,6 @@
 package passwordapplication.services;
 
-import passwordapplication.dao.WhitewordDao;
+import passwordapplication.dao.WhitewordDAO;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,41 +15,46 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PasswordGenerator {
+
     /**
      * The number of words that are used to create a password.
      */
-    
-    @Autowired
-    WhitewordDao whiteworddao;
 
-    
+    @Autowired
+    WhitewordDAO whiteworddao;
+
     /**
-     * Method to generate  passwords
+     * Method to generate passwords
      *
      * @param amount - number of passwords to generate
+     * @param wordnumber - the number of words in a generated password
+     * @param dividers - a list of dividers to be used in between words
      * @return List of strings
-     */    
-    public List<String> getPasswords (Integer amount, Integer wordnumber, List<String> dividers) throws SQLException{
+     * @throws java.sql.SQLException
+     */
+    public List<String> getPasswords(Integer amount, Integer wordnumber, List<String> dividers) throws SQLException {
         //First get the needed number of active words from database
         ArrayList<String> words = whiteworddao.listNActiveStrings(wordnumber * amount);
         // If user gave no dividers, use line
-        if (dividers.isEmpty()){
+        if (dividers.isEmpty()) {
             dividers.add("-");
         }
         //get passwprds
         List<String> passwords = this.generate(amount, wordnumber, words, dividers);
         return passwords;
     }
-    
-    
+
     /**
      * Method to generate passwords from given lists of strings and dividers
      *
      * @param amount - number of passwords to generate
+     * @param wordnumber - the number of words in a generated password
+     * @param words - a list of the words to generate the passwords from
+     * @param dividers - a list of dividers to be used in between words
      * @return List of strings
      */
     public List<String> generate(Integer amount, Integer wordnumber, ArrayList<String> words, List<String> dividers) {
-        
+
         //Initialize the list of passwords
         List<String> passwords = new ArrayList<String>();
         //Generate the required number of passwords from the fetched words

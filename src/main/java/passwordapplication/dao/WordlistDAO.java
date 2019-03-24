@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import passwordapplication.domain.Wordlist;
+import passwordapplication.models.Wordlist;
 
 /**
  * Wordlistdao is the class that handles the database operations for the
@@ -20,7 +20,7 @@ import passwordapplication.domain.Wordlist;
  * @author antti
  */
 @Component
-public class WordlistDao {
+public class WordlistDAO {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -67,8 +67,6 @@ public class WordlistDao {
 
         return wordlist;
     }
-    
-
 
     /**
      * Method to delete Wordlist from database. Please note, that this method

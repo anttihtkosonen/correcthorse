@@ -1,18 +1,14 @@
 package passwordapplication.services;
 
-import passwordapplication.dao.BlackwordDao;
-import passwordapplication.dao.WhitewordDao;
-import passwordapplication.dao.WordlistDao;
+import passwordapplication.dao.*;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import passwordapplication.domain.Wordlist;
+import passwordapplication.models.Wordlist;
 
 /**
  * Class for operations related to showing user information about wordlists in
@@ -24,13 +20,13 @@ import passwordapplication.domain.Wordlist;
 public class ShowList {
 
     @Autowired
-    WhitewordDao whiteworddao;
+    WhitewordDAO whiteworddao;
 
     @Autowired
-    WordlistDao wordlistdao;
+    WordlistDAO wordlistdao;
 
     @Autowired
-    BlackwordDao blackworddao;
+    BlackwordDAO blackworddao;
 
     /**
      * Method to show information about all lists in the database.

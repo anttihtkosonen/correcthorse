@@ -1,8 +1,7 @@
 package passwordapplication.services;
 
-import passwordapplication.dao.BlackwordDao;
-import passwordapplication.dao.WhitewordDao;
-import passwordapplication.dao.WordlistDao;
+import passwordapplication.dao.*;
+import passwordapplication.models.Wordlist;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -14,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import passwordapplication.domain.Wordlist;
 
 /**
  * Class for list operations: adding list to and removing lists from database
@@ -26,25 +24,27 @@ import passwordapplication.domain.Wordlist;
 public class ListParser {
 
     @Autowired
-    WhitewordDao whiteworddao;
+    WhitewordDAO whiteworddao;
 
     @Autowired
-    WordlistDao wordlistdao;
+    WordlistDAO wordlistdao;
 
     @Autowired
-    BlackwordDao blackworddao;
+    BlackwordDAO blackworddao;
 
     /**
      * Method to add a list to the database from a text-file in the filesystem
      *
      * @param name - name for the list (added to the Wordlist-table)
      * @param location - location of the textfile in the filesystem
+     * @param timestamp - when the list was added to database
      * @param blacklist - the information of whether this is a blacklist
      * (true/false)
      * @throws FileNotFoundException if the textfile is not found
      * @throws IOException
+     * @throws java.sql.SQLException
      */
-    public void addList(String name, String location, Timestamp timestamp, Boolean blacklist) throws FileNotFoundException, IOException {
+    public void addList(String name, String location, Timestamp timestamp, Boolean blacklist) throws FileNotFoundException, IOException, SQLException {
         //Add list information to database (to the wordlist-table)
         Wordlist wordlist = new Wordlist(name, timestamp, blacklist);
         int list_id = 0;
@@ -88,19 +88,20 @@ public class ListParser {
 
                 } //In case the word is a whitelist word, to the following
                 else {
-                    Boolean status;
-                    //check if the word is on the blacklist, and set status active or inactive accordingly
-                    if (blackworddao.find(line)) {
-                        status = false;
-                    } else {
-                        status = true;
-                    }
                     try {
+                        Boolean status;
+                        //check if the word is on the blacklist, and set status active or inactive accordingly
+                        if (blackworddao.find(line)) {
+                            status = false;
+                        } else {
+                            status = true;
+                        }
                         //insert word into database
                         whiteworddao.insert(line, status, list_id);
+
                     } catch (SQLException ex) {
                         Logger.getLogger(ListParser.class.getName()).log(Level.SEVERE, null, ex);
-                        System.out.println("There was an error while adding the words to the database");
+                        System.out.println("There was a database error while adding the words to the database");
                         return;
                     }
 
@@ -113,8 +114,7 @@ public class ListParser {
     /**
      * Method to remove a list from the database
      *
-     * @param id - id-number (Wordlist-table primary key) of the list to be
-     * removed
+     * @param id - id-number (table primary key) of the list to be removed
      * @throws SQLException
      */
     public void removeList(Integer id) throws SQLException {

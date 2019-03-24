@@ -1,7 +1,6 @@
-package passwordapplication.domain;
+package passwordapplication.models;
 
 import java.sql.Timestamp;
-
 
 /**
  * Wordlist is the entity used for information about list of words. This class
@@ -49,7 +48,7 @@ public class Wordlist {
     public Boolean getBlacklist() {
         return this.blacklist;
     }
-    
+
     public Timestamp getTimestamp() {
         return this.timestamp;
     }

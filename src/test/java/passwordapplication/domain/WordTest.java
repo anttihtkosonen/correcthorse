@@ -5,8 +5,8 @@
  */
 package passwordapplication.domain;
 
-import passwordapplication.domain.Word;
-import passwordapplication.domain.Wordlist;
+import passwordapplication.models.Word;
+import passwordapplication.models.Wordlist;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

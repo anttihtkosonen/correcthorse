@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import passwordapplication.domain.Word;
+import passwordapplication.models.Word;
 
 /**
  * Blackworddao is the class that handles the database operations for the
@@ -17,7 +17,7 @@ import passwordapplication.domain.Word;
  * @author antti
  */
 @Component
-public class BlackwordDao {
+public class BlackwordDAO {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -30,7 +30,7 @@ public class BlackwordDao {
      */
     public void insert(Word word) throws SQLException {
         jdbcTemplate.update("INSERT INTO Blackword"
-                + " (blackword, list_id)"
+                + " (word, list_id)"
                 + " VALUES (?, ?)",
                 word.getWord(),
                 word.getWordlist().getId());
@@ -59,10 +59,10 @@ public class BlackwordDao {
      * @throws SQLException
      */
     public Word read(Integer id) throws SQLException {
-        Word blackword = jdbcTemplate.queryForObject("SELECT * FROM Blackword WHERE id = ?",
+        Word blackword = jdbcTemplate.queryForObject(
+                "SELECT * FROM Blackword WHERE id = ?",
                 new BeanPropertyRowMapper<>(Word.class),
                 id);
-
         return blackword;
     }
 
@@ -70,8 +70,10 @@ public class BlackwordDao {
      * Method to delete all words on a wordlist from the table
      *
      * @param list_id - list to be deleted
+     * @throws java.sql.SQLException if there was a database error during the
+     * operation
      */
-    public void deleteListWords(Integer list_id) {
+    public void deleteListWords(Integer list_id) throws SQLException {
         jdbcTemplate.update("DELETE FROM Blackword WHERE list_id = ?", list_id);
     }
 
@@ -80,8 +82,10 @@ public class BlackwordDao {
      *
      * @param word - string to find
      * @return - true if word exists in the table, false if not
+     * @throws java.sql.SQLException if there was a database error during the
+     * operation
      */
-    public Boolean find(String word) {
+    public Boolean find(String word) throws SQLException {
         List<Integer> list;
         list = jdbcTemplate.query("SELECT id FROM Blackword WHERE word = ?",
                 (rs, rowNum) -> new Integer(rs.getInt("id")), word);
@@ -97,8 +101,10 @@ public class BlackwordDao {
      *
      * @param word - string to count
      * @return number of times found
+     * @throws java.sql.SQLException if there was a database error during the
+     * operation
      */
-    public Integer count(String word) {
+    public Integer count(String word) throws SQLException {
         Integer count;
         count = jdbcTemplate.queryForObject(
                 "SELECT COUNT (*) FROM Blackword WHERE word = ?",
@@ -141,8 +147,15 @@ public class BlackwordDao {
         }, list_id);
         return stringlist;
     }
-    
-    public Integer getListSize(Integer list_id) {
+
+    /**
+     * Method to get the size of a list in the database
+     *
+     * @param list_id - the list to find the information for
+     * @return the number of rows in the list
+     * @throws SQLException
+     */
+    public Integer getListSize(Integer list_id) throws SQLException {
         Integer size = jdbcTemplate.queryForObject(
                 "SELECT COUNT (*) FROM Blackword WHERE list_id = ?",
                 Integer.class,

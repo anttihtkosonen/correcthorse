@@ -1,9 +1,6 @@
 package passwordapplication.domain;
 
-import passwordapplication.services.ListParser;
-import passwordapplication.services.ShowList;
-import passwordapplication.services.PasswordGenerator;
-import passwordapplication.services.InitializeDB;
+import passwordapplication.services.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -16,6 +13,7 @@ import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
+
 
 /**
  * Class for generating the text-based user interface. The methods here are used
@@ -111,6 +109,8 @@ public class Textinterface {
             listparser.addList(name, location, timestamp, blacklist);
         } catch (IOException ex) {
             System.out.println("File not found.");
+        } catch (SQLException ex) {
+            System.out.println("There was a database error while adding the list.");
         }
         return;
     }
@@ -188,11 +188,12 @@ public class Textinterface {
      * @param input Scanner-object for getting user input.
      */
     public void deleteDB(Scanner input) {
+        String database = "jdbc:h2:.//database/passwordDB";
         System.out.println("All data in database will be lost.\nAre you sure, that you want to do that? [y/N]");
         String confirmation = input.nextLine();
         if (confirmation.toLowerCase().equals("y")
                 || confirmation.toLowerCase().equals("yes")) {
-            initializeDB.initialize();
+            initializeDB.initialize(database);
         }
         return;
     }

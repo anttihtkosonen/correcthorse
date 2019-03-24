@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * The main class of the application. Used for starting the program.
@@ -12,6 +13,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author antti
  */
 @SpringBootApplication
+@ComponentScan({"passwordapplication.services"})
+@ComponentScan({"passwordapplication.domain"})
+@ComponentScan({"passwordapplication.dao"})
+@ComponentScan({"passwordapplication.models"})
 public class Passwordapplication implements CommandLineRunner {
 
     public static void main(String[] args) {

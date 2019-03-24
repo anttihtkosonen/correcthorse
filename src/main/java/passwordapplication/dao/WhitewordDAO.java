@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import passwordapplication.domain.Whiteword;
+import passwordapplication.models.Whiteword;
 
 /**
  * Whiteworddao is the class that handles the database operations for the
@@ -22,7 +22,7 @@ import passwordapplication.domain.Whiteword;
  * @author antti
  */
 @Component
-public class WhitewordDao {
+public class WhitewordDAO {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -96,8 +96,10 @@ public class WhitewordDao {
      * Method to delete all words on a wordlist from the table
      *
      * @param list_id - list to be deleted
+     * @throws java.sql.SQLException if there was a database error during the
+     * operation
      */
-    public void deleteListWords(Integer list_id) {
+    public void deleteListWords(Integer list_id) throws SQLException {
         jdbcTemplate.update("DELETE FROM Whiteword WHERE list_id = ?", list_id);
     }
 
@@ -105,9 +107,11 @@ public class WhitewordDao {
     /**
      * Method to set the activity of a word to false
      *
-     * @param word
+     * @param word the word (string) to set the activity for
+     * @throws java.sql.SQLException if there was a database error during the
+     * operation
      */
-    public void setInactive(String word) {
+    public void setInactive(String word) throws SQLException {
         jdbcTemplate.update("UPDATE Whiteword SET active = false WHERE word = ?", word);
     }
 
@@ -115,9 +119,11 @@ public class WhitewordDao {
     /**
      * Method to set the activity of a word to true
      *
-     * @param word
+     * @param word the word (string) to set the activity for
+     * @throws java.sql.SQLException if there was a database error during the
+     * operation
      */
-    public void setActive(String word) {
+    public void setActive(String word) throws SQLException {
         jdbcTemplate.update("UPDATE Whiteword SET active = true WHERE word = ?", word);
     }
 
@@ -191,8 +197,15 @@ public class WhitewordDao {
         }
         return list;
     }
-    
-    public Integer getListSize(Integer list_id) {
+
+    /**
+     * Method to get the size of a list in the database
+     *
+     * @param list_id - the list to find the information for
+     * @return the number of rows in the list
+     * @throws SQLException
+     */
+    public Integer getListSize(Integer list_id) throws SQLException {
         Integer size = jdbcTemplate.queryForObject(
                 "SELECT COUNT (*) FROM Whiteword WHERE list_id = ?",
                 Integer.class,
