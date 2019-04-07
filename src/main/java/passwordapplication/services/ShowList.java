@@ -29,7 +29,9 @@ public class ShowList {
     BlackwordDAO blackworddao;
 
     /**
-     * Method to show information about all lists in the database.
+     * Method to show information about all lists in the database. This prints
+     * out the information of each list into System.out Used in the text
+     * interface
      *
      * @throws SQLException
      */
@@ -41,11 +43,11 @@ public class ShowList {
         } catch (SQLException ex) {
             System.out.println("There was an error retrieving the information frim the database.");
         }
-        if (wordlistlist.size() == 0) {
+        if (wordlistlist.isEmpty()) {
             System.out.println("There are no wordlists in database.");
         } else {
             for (int i = 0; i < wordlistlist.size(); i++) {
-                
+
                 System.out.println("\n\n-----------------");
                 System.out.println("Name of list: " + wordlistlist.get(i).getName());
                 Date date = wordlistlist.get(i).getTimestamp();
@@ -58,17 +60,17 @@ public class ShowList {
                     System.out.println("This list is a blacklist");
                     samplelist = blackworddao.listTenStringsFromList(wordlistlist.get(i).getId());
                     size = blackworddao.getListSize(wordlistlist.get(i).getId());
-                    
+
                 } else {
                     System.out.println("This list is a normal list, not a blacklist");
                     samplelist = whiteworddao.listTenStringsFromList(wordlistlist.get(i).getId());
                     size = whiteworddao.getListSize(wordlistlist.get(i).getId());
                 }
 
-                if (samplelist.size() == 0) {
+                if (samplelist.isEmpty()) {
                     System.out.println("There are no words on this list");
                 } else {
-                    System.out.println("There are "+size+" words on this list\n");
+                    System.out.println("There are " + size + " words on this list\n");
                     System.out.println("Sample of words from this list:\n");
                     for (int j = 0; j < samplelist.size(); j++) {
                         System.out.println(samplelist.get(j));
@@ -78,4 +80,49 @@ public class ShowList {
             }
         }
     }
+
+    public List<String> getAll() throws SQLException {
+
+        List<Wordlist> wordlistlist = new ArrayList();
+        wordlistlist = wordlistdao.list();
+        List<String> list = new ArrayList();
+        
+        for (int i = 0; i < wordlistlist.size(); i++) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("\nName of list: ").append(wordlistlist.get(i).getName());
+            
+            Date date = wordlistlist.get(i).getTimestamp();
+            String dateString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+            stringBuilder.append("\nWhen the list was added: ").append(dateString);
+
+            stringBuilder.append("\nId number of list: ").append(wordlistlist.get(i).getId());
+            
+            List<String> samplelist;
+            Integer size = 0;
+            if (wordlistlist.get(i).getBlacklist()) {
+                stringBuilder.append("\nThis list is a blacklist");
+                samplelist = blackworddao.listTenStringsFromList(wordlistlist.get(i).getId());
+                size = blackworddao.getListSize(wordlistlist.get(i).getId());
+
+            } else {
+                stringBuilder.append("\nThis list is a normal list, not a blacklist");
+                samplelist = whiteworddao.listTenStringsFromList(wordlistlist.get(i).getId());
+                size = whiteworddao.getListSize(wordlistlist.get(i).getId());
+            }
+
+            if (samplelist.isEmpty()) {
+                stringBuilder.append("\nThere are no words on this list");
+            } else {
+                stringBuilder.append("\nThere are ").append(size).append(" words on this list");
+                stringBuilder.append("\nSample of words from this list:");
+                for (int j = 0; j < samplelist.size(); j++) {
+                    stringBuilder.append("\n").append(samplelist.get(j));
+                }
+            }
+            list.add(i, stringBuilder.toString());
+        }
+        return list;
+    }
+    
 }
+

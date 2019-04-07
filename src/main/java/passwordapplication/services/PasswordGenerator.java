@@ -33,6 +33,8 @@ public class PasswordGenerator {
      * @throws java.sql.SQLException
      */
     public List<String> getPasswords(Integer amount, Integer wordnumber, List<String> dividers) throws SQLException {
+        System.out.println("PasswordGenerator.getPasswords");
+        System.out.println("amount: "+amount.toString());
         //First get the needed number of active words from database
         ArrayList<String> words = whiteworddao.listNActiveStrings(wordnumber * amount);
         // If user gave no dividers, use line
