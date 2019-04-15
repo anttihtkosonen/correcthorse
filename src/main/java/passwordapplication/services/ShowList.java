@@ -29,74 +29,28 @@ public class ShowList {
     BlackwordDAO blackworddao;
 
     /**
-     * Method to show information about all lists in the database. This prints
-     * out the information of each list into System.out Used in the text
-     * interface
+     * Method to get the information about all lists in the database. This
+     * prints out the information of each list as a list of strings Used in the
+     * graphical user interface.
      *
+     * @return list of strings, each of which has the information about a single
+     * wordlist
      * @throws SQLException
      */
-    public void showAll() throws SQLException {
-
-        List<Wordlist> wordlistlist = new ArrayList();
-        try {
-            wordlistlist = wordlistdao.list();
-        } catch (SQLException ex) {
-            System.out.println("There was an error retrieving the information frim the database.");
-        }
-        if (wordlistlist.isEmpty()) {
-            System.out.println("There are no wordlists in database.");
-        } else {
-            for (int i = 0; i < wordlistlist.size(); i++) {
-
-                System.out.println("\n\n-----------------");
-                System.out.println("Name of list: " + wordlistlist.get(i).getName());
-                Date date = wordlistlist.get(i).getTimestamp();
-                String dateString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-                System.out.println("When the list was added: " + dateString);
-                System.out.println("Id number of list: " + wordlistlist.get(i).getId());
-                List<String> samplelist;
-                Integer size = 0;
-                if (wordlistlist.get(i).getBlacklist()) {
-                    System.out.println("This list is a blacklist");
-                    samplelist = blackworddao.listTenStringsFromList(wordlistlist.get(i).getId());
-                    size = blackworddao.getListSize(wordlistlist.get(i).getId());
-
-                } else {
-                    System.out.println("This list is a normal list, not a blacklist");
-                    samplelist = whiteworddao.listTenStringsFromList(wordlistlist.get(i).getId());
-                    size = whiteworddao.getListSize(wordlistlist.get(i).getId());
-                }
-
-                if (samplelist.isEmpty()) {
-                    System.out.println("There are no words on this list");
-                } else {
-                    System.out.println("There are " + size + " words on this list\n");
-                    System.out.println("Sample of words from this list:\n");
-                    for (int j = 0; j < samplelist.size(); j++) {
-                        System.out.println(samplelist.get(j));
-                    }
-                }
-
-            }
-        }
-    }
-
-    public List<String> getAll() throws SQLException {
+    public List<String> showAll() throws SQLException {
 
         List<Wordlist> wordlistlist = new ArrayList();
         wordlistlist = wordlistdao.list();
+
         List<String> list = new ArrayList();
-        
+
         for (int i = 0; i < wordlistlist.size(); i++) {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("\nName of list: ").append(wordlistlist.get(i).getName());
-            
             Date date = wordlistlist.get(i).getTimestamp();
             String dateString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
             stringBuilder.append("\nWhen the list was added: ").append(dateString);
-
             stringBuilder.append("\nId number of list: ").append(wordlistlist.get(i).getId());
-            
             List<String> samplelist;
             Integer size = 0;
             if (wordlistlist.get(i).getBlacklist()) {
@@ -123,6 +77,5 @@ public class ShowList {
         }
         return list;
     }
-    
-}
 
+}

@@ -1,55 +1,62 @@
 package passwordapplication.domain;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.stereotype.Component;
 import passwordapplication.gui.GUI;
 
-
 /**
- * The main class of the application. Used for starting the program.
+ * The main class of the application. Used for starting the program
  *
  * @author antti
  */
-
 
 @SpringBootApplication
 @ComponentScan({"passwordapplication.services"})
 @ComponentScan({"passwordapplication.domain"})
 @ComponentScan({"passwordapplication.dao"})
 @ComponentScan({"passwordapplication.models"})
-@ComponentScan({"passwordapplication.gui"})
-//public class Passwordapplication implements CommandLineRunner {
-public class Passwordapplication extends Application {
+public class Passwordapplication implements CommandLineRunner {
 
-    @Autowired
-    GUI gui;
-    
     public static void main(String[] args) {
-        System.out.println("main");
-        launch(Passwordapplication.class, args);
+        //SpringApplication.run(Passwordapplication.class);
+        GUI.launchApp(GUI.class);
     }
-    
+
     @Override
-    public void start(Stage stage) throws Exception {
-        
-        System.out.println("start");
-        //Stage stage = new Stage();
-        gui.run(stage);
+    public void run(String... args) throws Exception {
+        System.out.println("Passwordapplication run");
     }
+
 }
-    
-    
+
+
+
+
+
+
+
+
 /*
+@SpringBootApplication
+@ComponentScan({"passwordapplication.services"})
+@ComponentScan({"passwordapplication.domain"})
+@ComponentScan({"passwordapplication.dao"})
+@ComponentScan({"passwordapplication.models"})
+public class Passwordapplication implements CommandLineRunner {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Passwordapplication.class);
+    }
+
     @Autowired
     Textinterface textinterface;
 
+    @Override
     public void run(String... args) throws Exception {
-        System.out.println("run");
         Scanner input = new Scanner(System.in);
         textinterface.start(input);
     }
+
+}
 */

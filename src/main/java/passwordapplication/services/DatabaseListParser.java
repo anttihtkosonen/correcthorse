@@ -4,8 +4,8 @@ import passwordapplication.dao.*;
 import passwordapplication.models.Wordlist;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
@@ -15,13 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Class for list operations: adding list to and removing lists from database
- * The methods here are used for parsing data for the use of DAOs
+ * Class for list operations: adding list to and removing lists from database.
+ * The methods here are used for parsing data for the use of DAOs.
  *
  * @author antti
  */
 @Component
-public class ListParser {
+public class DatabaseListParser {
 
     @Autowired
     WhitewordDAO whiteworddao;
@@ -31,6 +31,11 @@ public class ListParser {
 
     @Autowired
     BlackwordDAO blackworddao;
+    
+        
+    @Autowired
+    FileListParser filelistparser;
+
 
     /**
      * Method to add a list to the database from a text-file in the filesystem
@@ -44,7 +49,24 @@ public class ListParser {
      * @throws IOException
      * @throws java.sql.SQLException
      */
-    public void addList(String name, String location, Timestamp timestamp, Boolean blacklist) throws FileNotFoundException, IOException, SQLException {
+    public void addListFromFile(String name, String location, Timestamp timestamp, Boolean blacklist) throws FileNotFoundException, IOException, SQLException {
+
+        String words = filelistparser.getListFromFile(location);
+        this.addList(name, words, timestamp, blacklist);
+    }
+
+    /**
+     * Method to add a list to the database from a list of words
+     *
+     * @param name - name for the list (added to the Wordlist-table)
+     * @param words - list of words, each on its own line
+     * @param timestamp - when the list was added to database
+     * @param blacklist - the information of whether this is a blacklist
+     * (true/false)
+     * @throws IOException
+     * @throws java.sql.SQLException
+     */
+    public void addList(String name, String words, Timestamp timestamp, Boolean blacklist) throws IOException, SQLException {
         //Add list information to database (to the wordlist-table)
         Wordlist wordlist = new Wordlist(name, timestamp, blacklist);
         int list_id = 0;
@@ -55,7 +77,7 @@ public class ListParser {
             return;
         }
         //add words to database
-        BufferedReader br = new BufferedReader(new FileReader(location));
+        BufferedReader br = new BufferedReader(new StringReader(words));
         String line;
         //go through each line in list
         while ((line = br.readLine()) != null) {
@@ -79,7 +101,6 @@ public class ListParser {
                         //insert word into database
                         blackworddao.insert(line, list_id);
                     } catch (SQLException ex) {
-                        Logger.getLogger(ListParser.class.getName()).log(Level.SEVERE, null, ex);
                         System.out.println("There was an error while adding the words to the database");
                         return;
                     }
@@ -100,7 +121,7 @@ public class ListParser {
                         whiteworddao.insert(line, status, list_id);
 
                     } catch (SQLException ex) {
-                        Logger.getLogger(ListParser.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(DatabaseListParser.class.getName()).log(Level.SEVERE, null, ex);
                         System.out.println("There was a database error while adding the words to the database");
                         return;
                     }
@@ -119,7 +140,7 @@ public class ListParser {
      */
     public void removeList(Integer id) throws SQLException {
         //get the wordlist-object
-        Boolean blacklist = wordlistdao.read(id).getBlacklist();
+        Boolean blacklist = wordlistdao.readBlacklistStatus(id);
 
         // If the wordlist is a blacklist, we need to a check for each word if it belongs to another blacklist
         // If there is no other instance, we need to go through the whitelist, and set all instances of this word active.  
@@ -142,5 +163,7 @@ public class ListParser {
         //finally we just remove the wordlist from the wordlist-table
         wordlistdao.deleteList(id);
     }
+    
+
 
 }

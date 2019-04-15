@@ -36,7 +36,7 @@ public class Wordlist {
         this.timestamp = timestamp;
         this.blacklist = blacklist;
     }
-
+    
     public Integer getId() {
         return this.id;
     }

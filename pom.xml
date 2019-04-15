@@ -24,7 +24,7 @@
     
     <dependencies>
         <!-- HUOM! TMC-palvelin käyttää vain tehtäväpohjaan määriteltyjä
-                riippuvuuksia. Älä lisää projektiin omia riippuvuuksia. -->
+        riippuvuuksia. Älä lisää projektiin omia riippuvuuksia. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
@@ -43,10 +43,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>org.dbunit</groupId>
-          <artifactId>dbunit</artifactId>
-          <version>2.6.0</version>
-          <scope>test</scope>
+            <groupId>org.dbunit</groupId>
+            <artifactId>dbunit</artifactId>
+            <version>2.6.0</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
@@ -70,6 +70,19 @@
     
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

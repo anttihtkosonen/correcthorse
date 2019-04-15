@@ -1,13 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package passwordapplication.dao;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.util.Pair;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Test;
@@ -23,147 +19,170 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import passwordapplication.models.Word;
+import passwordapplication.models.Whiteword;
 import passwordapplication.models.Wordlist;
 
-/**
- *
- * @author antti
- */
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class BlackwordDaoTest {
-    
+public class WhitewordDAOTest {
+
     @Mock
-    Word mockword;
-    
+    Whiteword mockword;
+
     @Mock
     Wordlist mockwordlist;
-    
+
     @Mock
     JdbcTemplate mockjdbcTemplate;
     
     @InjectMocks
-    private BlackwordDAO blackworddao = new BlackwordDAO();
+    private WhitewordDAO whiteworddao = new WhitewordDAO();
 
+    
     @Test
     public void TestInsert() {
         when(mockword.getWord()).thenReturn("mock");
+        when(mockword.getActive()).thenReturn(true);
         when(mockword.getWordlist()).thenReturn(mockwordlist);
         when(mockwordlist.getId()).thenReturn(1);
         try {
-            blackworddao.insert(mockword);
+            whiteworddao.insert(mockword);
         } catch (SQLException ex) {
             fail("SQL error");
-        } 
+        }
     }
-    
-        @Test
+
+   
+    @Test
     public void TestSecondInsert() {
         try {
-            blackworddao.insert("mock", 1);
+            whiteworddao.insert("mock", true, 1);
         } catch (SQLException ex) {
             fail("SQL error");
-        } 
+        }
     }
-    
+
+   
     @Test
-    public void TestRead(){
+    public void TestRead() {
         when(mockjdbcTemplate.queryForObject(anyString(), any(BeanPropertyRowMapper.class), anyInt())).thenReturn(mockword);
-        Word retVal = new Word();
+        Whiteword retVal = new Whiteword();
         try {
-            retVal = blackworddao.read(1);
+            retVal = whiteworddao.read(1);
         } catch (SQLException ex) {
             fail("SQL error");
         }
         assertEquals(mockword, retVal);
 
     }
-    
+
+
     @Test
-    public void TestDeleteListWords(){
+    public void TestReadNameAndActive() {
+        Pair mockpair = new Pair("mock", true);
+        when(mockjdbcTemplate.queryForObject(anyString(), any(RowMapper.class), anyInt())).thenReturn(mockpair);
+        Pair retVal = null;
         try {
-            blackworddao.deleteListWords(1);
-        } catch (SQLException ex) {
-            fail("SQL error");
-        }         
-    }
-    
-    @Test
-    public void TestFindWhenFound(){
-        List<Integer> mockList = new ArrayList();
-        mockList.add(1);
-        when(mockjdbcTemplate.query(anyString(), any(RowMapper.class), anyString())).thenReturn(mockList);
-        Boolean retVal = null;
-        try {
-            retVal = blackworddao.find("mock");
+            retVal = whiteworddao.readNameAndActive(1);
         } catch (SQLException ex) {
             fail("SQL error");
         }
-        
-        assertEquals(true, retVal);
+
+        assertEquals(mockpair, retVal);
     }
-    
+
+ 
     @Test
-    public void TestFindWhenNotFound(){
-        List<Integer> mockList = new ArrayList();
-        when(mockjdbcTemplate.query(anyString(), any(RowMapper.class), anyString())).thenReturn(mockList);
-        Boolean retVal = null;
+    public void TestDeleteListWords() {
         try {
-            retVal = blackworddao.find("mock");
+            whiteworddao.deleteListWords(1);
         } catch (SQLException ex) {
             fail("SQL error");
         }
-        assertEquals(retVal, false);
     }
-    
+
+   
     @Test
-    public void TestCount(){
-        when(mockjdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString())).thenReturn(1);
-        int retVal = 0;
+    public void TestSetInactive() {
         try {
-            retVal = blackworddao.count("mock");
+            whiteworddao.setInactive("mock");
         } catch (SQLException ex) {
             fail("SQL error");
         }
-        assertEquals(1, retVal);
     }
-    
+
+
     @Test
-    public void TestListWords(){
+    public void TestSetActive() {
+        try {
+            whiteworddao.setActive("mock");
+        } catch (SQLException ex) {
+            fail("SQL error");
+        }
+    }
+
+
+    @Test
+    public void TestListTenStringsFromList() {
         List<String> mockList = new ArrayList();
         mockList.add("mock");
         mockList.add("list");
         when(mockjdbcTemplate.query(anyString(), any(RowMapper.class), anyInt())).thenReturn(mockList);
         List<String> retVal = null;
         try {
-            retVal = blackworddao.listWords(1);
+            retVal = whiteworddao.listTenStringsFromList(1);
         } catch (SQLException ex) {
             fail("SQL error");
         }
         assertEquals(mockList, retVal);
     }
-        
+
+
     @Test
-    public void TestListTenStringsFromList(){
+    public void TestListNActiveStrings() throws SQLException{
         List<String> mockList = new ArrayList();
-        mockList.add("mock");
-        mockList.add("list");
-        when(mockjdbcTemplate.query(anyString(), any(RowMapper.class), anyInt())).thenReturn(mockList);
+        mockList.add("mock1");
+        mockList.add("mock2");
+        mockList.add("mock3");
+        Pair mockpair1 = new Pair("mock1", true);
+        Pair mockpair2 = new Pair("mock2", true);
+        Pair mockpair3 = new Pair("mock3", true);
+        when(mockjdbcTemplate.queryForObject(anyString(), any(RowMapper.class), anyInt())).thenReturn(mockpair1, mockpair2, mockpair3, mockpair3);
+        when(mockjdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(100);
+        //doReturn(mockpair).when(whiteworddao).readNameAndActive(anyInt());
         List<String> retVal = null;
         try {
-            retVal = blackworddao.listTenStringsFromList(1);
+            retVal = whiteworddao.listNActiveStrings(3);
         } catch (SQLException ex) {
             fail("SQL error");
         }
         assertEquals(mockList, retVal);
-    }
-        
+    }   
+    
+        @Test
+    public void TestListNActiveStringsWhenInsufficientWords() throws SQLException{
+        List<String> mockList = new ArrayList();
+        Pair mockpair1 = new Pair("mock1", true);
+        Pair mockpair2 = new Pair("mock2", true);
+        when(mockjdbcTemplate.queryForObject(anyString(), any(RowMapper.class), anyInt())).thenReturn(mockpair1, mockpair2);
+        when(mockjdbcTemplate.queryForObject(anyString(), eq(Integer.class))).thenReturn(2);
+        //doReturn(mockpair).when(whiteworddao).readNameAndActive(anyInt());
+        List<String> retVal = null;
+        try {
+            retVal = whiteworddao.listNActiveStrings(3);
+        } catch (SQLException ex) {
+            fail("SQL error");
+        }
+        assertEquals(mockList, retVal);
+    }   
+  
+
+
     @Test
     public void TestGetListSize(){
         when(mockjdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyInt())).thenReturn(1);
         int retVal = 0;
         try {
-            retVal = blackworddao.getListSize(1);
+            retVal = whiteworddao.getListSize(1);
         } catch (SQLException ex) {
             fail("SQL error");
         }

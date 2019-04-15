@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.stereotype.Component;
-import passwordapplication.domain.Passwordapplication;
+//import passwordapplication.domain.Passwordapplication;
 
 /**
  * Class for initializing the database. All tables are dropped, and then created
@@ -33,7 +33,7 @@ public class InitializeDB {
             conn.prepareStatement("CREATE TABLE Blackword (id BIGINT PRIMARY KEY AUTO_INCREMENT, word VARCHAR(30) NOT NULL, list_id INTEGER NOT NULL, FOREIGN KEY (list_id) REFERENCES Wordlist(id));").executeUpdate();
 
         } catch (SQLException ex) {
-            Logger.getLogger(Passwordapplication.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(Passwordapplication.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

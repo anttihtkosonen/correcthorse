@@ -19,30 +19,47 @@ public class PasswordGenerator {
     /**
      * The number of words that are used to create a password.
      */
-
     @Autowired
     WhitewordDAO whiteworddao;
 
     /**
-     * Method to generate passwords
+     * Method to generate passwords from words in database and an optional list
+     * of dividers
      *
-     * @param amount - number of passwords to generate
-     * @param wordnumber - the number of words in a generated password
-     * @param dividers - a list of dividers to be used in between words
-     * @return List of strings
+     * @param amount - number of passwords to generate.
+     * @param wordnumber - the number of words in a generated password.
+     * @param dividers - a list of dividers to be used in between words. Can be
+     * and empty list.
+     * @return List of strings. An empty list will be returned if there were an
+     * insufficient number of words in the database to generate requested
+     * password set.
+     * 
      * @throws java.sql.SQLException
      */
     public List<String> getPasswords(Integer amount, Integer wordnumber, List<String> dividers) throws SQLException {
-        System.out.println("PasswordGenerator.getPasswords");
-        System.out.println("amount: "+amount.toString());
-        //First get the needed number of active words from database
+        //Initialize list
+        List<String> passwords = new ArrayList();
+
+        //Get the needed number of words from database
         ArrayList<String> words = whiteworddao.listNActiveStrings(wordnumber * amount);
+
+        /*
+        If there are an insufficient number of words in the database, then 
+        whiteworddao.listNActiveStrings will return an empty list. In this case
+        an empty list should also be returned from this method.
+         */
+        if (words.isEmpty()) {
+            return passwords;
+        }
+
         // If user gave no dividers, use line
-        if (dividers.isEmpty()) {
+        System.out.println(dividers.size());
+        if (dividers.size() == 0) {
             dividers.add("-");
+
         }
         //get passwprds
-        List<String> passwords = this.generate(amount, wordnumber, words, dividers);
+        passwords = this.generate(amount, wordnumber, words, dividers);
         return passwords;
     }
 

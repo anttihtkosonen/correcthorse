@@ -1,47 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package passwordapplication.domain;
 
 import passwordapplication.models.Word;
 import passwordapplication.models.Wordlist;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-/**
- *
- * @author antti
- */
+
 public class WordTest {
     
-    public WordTest() {
-    }
-    
-    @BeforeClass
-    public static void setUpClass() {
-    }
-    
-    @AfterClass
-    public static void tearDownClass() {
-    }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
-    }
-
-    /**
-     * Test of setWord and getWord method, of class Word.
-     */
     @Test
     public void testSetGetWord() {
         System.out.println("getWord");
@@ -52,9 +18,6 @@ public class WordTest {
         assertEquals(expResult, result);
     }
 
-    /**
-     * Test of setWordlist and getWordlist method, of class Word.
-     */
 
     @Test
     public void testSetGetWordlist() {

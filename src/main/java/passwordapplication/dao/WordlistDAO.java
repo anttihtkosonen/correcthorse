@@ -33,9 +33,8 @@ public class WordlistDAO {
      * @throws SQLException
      */
     public Integer insert(Wordlist wordlist) throws SQLException {
-        /**
-         * A Keyholder is created for storing the id of the created sql-row.
-         */
+
+        //A Keyholder is created for storing the id of the created sql-row.
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(
@@ -52,20 +51,25 @@ public class WordlistDAO {
         return id;
     }
 
+
     /**
-     * Method for reading a word from the table into a Wordlist-object
-     *
+     * Method for reading the blacklist-status of a wordlist.
+     * 
      * @param id - id (primary key) of the list to be read
-     * @return Wordlist-object
+     * @return Boolean object, that corresponds to blacklist-status.
      * @throws SQLException
      */
-    public Wordlist read(Integer id) throws SQLException {
-        Wordlist wordlist = jdbcTemplate.queryForObject(
-                "SELECT * FROM Wordlist WHERE id = ?",
-                new BeanPropertyRowMapper<>(Wordlist.class),
-                id);
-
-        return wordlist;
+    public Boolean readBlacklistStatus(Integer id) throws SQLException {
+        System.out.println("Wordlistdao id: " + id);
+        String blacklist = jdbcTemplate.queryForObject(
+                "SELECT blacklist FROM Wordlist WHERE id = ?",
+                String.class, id);
+        if (blacklist == "TRUE") {
+            return true;
+        }else{
+            return false;
+        }
+        
     }
 
     /**
@@ -74,10 +78,11 @@ public class WordlistDAO {
      *
      * @param list_id - id (primary key) of the list to be delete.
      */
-    public void deleteList(Integer list_id) {
+    public void deleteList(Integer list_id) throws SQLException {
         jdbcTemplate.update("DELETE FROM Wordlist WHERE id = ?", list_id);
     }
 
+    
     /**
      * Method to list the wordlists in the database.
      *

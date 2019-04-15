@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Class for generating the text-based user interface. The methods here are used
  * for receiving user commands and calling the corresponding classes of the
@@ -29,7 +28,7 @@ public class Textinterface {
     InitializeDB initializeDB;
 
     @Autowired
-    ListParser listparser;
+    DatabaseListParser listparser;
 
     @Autowired
     ShowList showlist;
@@ -39,6 +38,7 @@ public class Textinterface {
 
     /**
      * Method that gets user input and calls the appropriate method accordingly
+     *
      * @param input Scanner-object for getting user input.
      */
     public void start(Scanner input) {
@@ -73,6 +73,7 @@ public class Textinterface {
 
     /**
      * Method for adding a Wordlist
+     *
      * @param input Scanner-object for getting user input.
      */
     public void add(Scanner input) {
@@ -106,7 +107,7 @@ public class Textinterface {
         }
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         try {
-            listparser.addList(name, location, timestamp, blacklist);
+            listparser.addListFromFile(name, location, timestamp, blacklist);
         } catch (IOException ex) {
             System.out.println("File not found.");
         } catch (SQLException ex) {
@@ -117,6 +118,7 @@ public class Textinterface {
 
     /**
      * Method for generating passwords
+     *
      * @param input Scanner-object for getting user input.
      */
     public void generate(Scanner input) {
@@ -131,7 +133,7 @@ public class Textinterface {
         List<String> dividers = new ArrayList();
         while (true) {
             String divider = input.nextLine();
-            if (divider.isEmpty()){
+            if (divider.isEmpty()) {
                 break;
             } else {
                 dividers.add(divider);
@@ -153,16 +155,22 @@ public class Textinterface {
      * Method for showing the lists in the database
      */
     public void show() {
+        List<String> lists = new ArrayList();
         try {
-            showlist.showAll();
+            lists = showlist.showAll();
         } catch (SQLException ex) {
-            Logger.getLogger(ListParser.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DatabaseListParser.class.getName()).log(Level.SEVERE, null, ex);
         }
+        for (int i = 0; i < lists.size(); i++) {
+            System.out.println(lists.get(i));
+        }
+
         return;
     }
 
     /**
      * Method for removing lists from database
+     *
      * @param input Scanner-object for getting user input.
      */
     public void remove(Scanner input) {
@@ -185,6 +193,7 @@ public class Textinterface {
 
     /**
      * Method for clearing the database
+     *
      * @param input Scanner-object for getting user input.
      */
     public void deleteDB(Scanner input) {
