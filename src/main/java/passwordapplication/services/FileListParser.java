@@ -29,9 +29,9 @@ public class FileListParser {
      *
      * @param file
      * @param list
+     * @throws java.io.IOException
      */
     public void saveListToFile(File file, List<String> list) throws IOException {
-
         if (file != null) {
             FileWriter writer = new FileWriter(file);
             for (String str : list) {
@@ -43,6 +43,13 @@ public class FileListParser {
 
     }
 
+    /**
+     * Method to get a list from a file in the filesystem
+     *
+     * @param location location of the list in the filesystem
+     * @return the list as String. No parsing of any kind is done in this
+     * method, bur rather the list is returned as-is
+     */
     public String getListFromFile(String location) {
         StringBuilder contentBuilder = new StringBuilder();
         try (Stream<String> stream = Files.lines(Paths.get(location), StandardCharsets.UTF_8)) {

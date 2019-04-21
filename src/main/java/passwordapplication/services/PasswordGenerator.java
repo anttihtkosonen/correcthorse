@@ -9,16 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Class for generating passwords
+ * Class for generating passwords.
  *
  * @author antti
  */
 @Component
 public class PasswordGenerator {
 
-    /**
-     * The number of words that are used to create a password.
-     */
     @Autowired
     WhitewordDAO whiteworddao;
 
@@ -33,7 +30,7 @@ public class PasswordGenerator {
      * @return List of strings. An empty list will be returned if there were an
      * insufficient number of words in the database to generate requested
      * password set.
-     * 
+     *
      * @throws java.sql.SQLException
      */
     public List<String> getPasswords(Integer amount, Integer wordnumber, List<String> dividers) throws SQLException {
@@ -42,7 +39,6 @@ public class PasswordGenerator {
 
         //Get the needed number of words from database
         ArrayList<String> words = whiteworddao.listNActiveStrings(wordnumber * amount);
-
         /*
         If there are an insufficient number of words in the database, then 
         whiteworddao.listNActiveStrings will return an empty list. In this case
@@ -52,12 +48,9 @@ public class PasswordGenerator {
             return passwords;
         }
 
-        // If user gave no dividers, use line
-        System.out.println(dividers.size());
-        if (dividers.size() == 0) {
-            dividers.add("-");
+        //Parse the dividers-list to match rewuirements.
+        dividers = this.parseDividers(dividers);
 
-        }
         //get passwprds
         passwords = this.generate(amount, wordnumber, words, dividers);
         return passwords;
@@ -73,7 +66,6 @@ public class PasswordGenerator {
      * @return List of strings
      */
     public List<String> generate(Integer amount, Integer wordnumber, ArrayList<String> words, List<String> dividers) {
-
         //Initialize the list of passwords
         List<String> passwords = new ArrayList<String>();
         //Generate the required number of passwords from the fetched words
@@ -82,12 +74,63 @@ public class PasswordGenerator {
             String password = words.remove(0);
             for (int j = 1; j < wordnumber; j++) {
                 Random rand = new Random();
-                String divider = dividers.get(rand.nextInt(dividers.size()));
+                int randomIndex = rand.nextInt(dividers.size());
+                String divider = dividers.get(randomIndex);
                 password += divider;
                 password += words.remove(0);
             }
             passwords.add(password);
         }
         return passwords;
+    }
+
+    /**
+     * Method to parse a list of dividers supplied by the user.
+     *
+     * @param dividers list supplied by user
+     * @return a parsed list
+     */
+    public List<String> parseDividers(List<String> dividers) {
+        List<String> output = new ArrayList();
+
+        //Go through the list of dividers and copy all acceptable ones to output
+        Boolean acceptable = true;
+        for (int i = 0; i < dividers.size(); i++) {
+            acceptable = true;
+
+            //Get the string from list and strip whitespaces
+            String st = dividers.get(i);
+            st = st.replaceAll("\\s+", "");
+
+            //if the string is empty or too long, mark as unacceptable
+            if (st.length() > 3  || st.length() == 0) {
+                acceptable = false;
+            }
+
+            /*
+            If the string is still acceptable, go through the characters in the 
+            string, and mark unacceptable if any of the characters is outside 
+            the printable standard ASCII range
+             */
+            if (acceptable) {
+                char[] chars = st.toCharArray();
+                for (char c : chars) {
+                    if (c < 33 || c > 126) {
+                        acceptable = false;
+                        break;
+                    }
+                }
+            }
+            //if still acceptable, copy to output
+            if (acceptable) {
+                output.add(dividers.get(i));
+            }
+        }
+
+        // If user gave no dividers, or if none were acceptable, add "-"
+        if (output.size() == 0) {
+            output.add("-");
+        }
+        return output;
     }
 }

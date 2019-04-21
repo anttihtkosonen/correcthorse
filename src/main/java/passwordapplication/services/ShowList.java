@@ -30,20 +30,21 @@ public class ShowList {
 
     /**
      * Method to get the information about all lists in the database. This
-     * prints out the information of each list as a list of strings Used in the
-     * graphical user interface.
+     * method prints out the information of each list as a list of strings Used
+     * in the graphical user interface.
      *
      * @return list of strings, each of which has the information about a single
      * wordlist
-     * @throws SQLException
+     * @throws SQLException if there was a database error during the operation
      */
     public List<String> showAll() throws SQLException {
-
+        List<String> list = new ArrayList();
+        
+        //get the Wordlist-objects from the database
         List<Wordlist> wordlistlist = new ArrayList();
         wordlistlist = wordlistdao.list();
 
-        List<String> list = new ArrayList();
-
+        //Generate an information-string of each wordlist, and append to list
         for (int i = 0; i < wordlistlist.size(); i++) {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("\nName of list: ").append(wordlistlist.get(i).getName());

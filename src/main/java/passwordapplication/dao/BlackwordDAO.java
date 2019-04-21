@@ -26,7 +26,8 @@ public class BlackwordDAO {
      * Method for adding a word-object to the Blackword-table
      *
      * @param word - The word-object to be added
-     * @throws SQLException
+     * @throws SQLException if there was a database error during the
+     * operation
      */
     public void insert(Word word) throws SQLException {
         jdbcTemplate.update("INSERT INTO Blackword"
@@ -42,7 +43,8 @@ public class BlackwordDAO {
      *
      * @param word - the word (string) to be added
      * @param list_id - the id of the list the word belongs to
-     * @throws SQLException
+     * @throws SQLException if there was a database error during the
+     * operation
      */
     public void insert(String word, int list_id) throws SQLException {
         jdbcTemplate.update("INSERT INTO Blackword"
@@ -56,7 +58,8 @@ public class BlackwordDAO {
      *
      * @param id - id (primary key) of the word to be read
      * @return blackword-object
-     * @throws SQLException
+     * @throws SQLException if there was a database error during the
+     * operation
      */
     public Word read(Integer id) throws SQLException {
         Word blackword = jdbcTemplate.queryForObject(
@@ -118,7 +121,8 @@ public class BlackwordDAO {
      *
      * @param list_id - Wordlist to list from
      * @return List of strings
-     * @throws SQLException
+     * @throws SQLException if there was a database error during the
+     * operation
      */
     public List<String> listWords(Integer list_id) throws SQLException {
         List<String> list = jdbcTemplate.query(
@@ -129,11 +133,12 @@ public class BlackwordDAO {
 
     /**
      * Method to list ten words (strings) from table - used to show a sample
-     * from list
+     * from list. If list has ten words or less, all words are returned.
      *
      * @param list_id - id-number of the list to list the words from
      * @return List of strings
-     * @throws SQLException
+     * @throws SQLException if there was a database error during the
+     * operation
      */
     public List<String> listTenStringsFromList(Integer list_id) throws SQLException {
 
@@ -153,7 +158,8 @@ public class BlackwordDAO {
      *
      * @param list_id - the list to find the information for
      * @return the number of rows in the list
-     * @throws SQLException
+     * @throws SQLException if there was a database error during the
+     * operation
      */
     public Integer getListSize(Integer list_id) throws SQLException {
         Integer size = jdbcTemplate.queryForObject(

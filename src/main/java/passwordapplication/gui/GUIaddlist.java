@@ -1,6 +1,8 @@
 package passwordapplication.gui;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.logging.Level;
@@ -18,6 +20,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import passwordapplication.services.DatabaseListParser;
@@ -33,15 +37,17 @@ public class GUIaddlist {
 
     @Autowired
     DatabaseListParser listparser;
-    
+
     @Autowired
     FileListParser filelistparser;
 
     /**
      * This method creates the view that can be called by the main GUI-class
+     *
+     * @param stage the window of the application
      * @return pane with window-contents
      */
-    public Parent getView() {
+    public Parent getView(Stage stage) {
         //Create window
         BorderPane pane = new BorderPane();
         VBox vbox = new VBox();
@@ -61,28 +67,68 @@ public class GUIaddlist {
         HBox blacklistBox = new HBox(blacklistLabel, blacklistCB);
 
         //Textfield for words
-        Label wordsLabel = new Label("Add the words in the field below, each on its own line, with no separators");
+        Label wordsLabel = new Label("Add the words in the field below, each on its own line, with no separators.");
         TextArea wordsArea = new TextArea("");
         wordsArea.setPrefHeight(500);
+
+        //Button for loading from file
+        Button loadButton = new Button("Load list from file");
 
         //Button for adding
         VBox bottombox = new VBox();
         bottombox.setPadding(new Insets(20, 20, 20, 20));
         Button addButton = new Button("Add list");
-        vbox.getChildren().addAll(headline, nameBox, blacklistBox, wordsLabel, wordsArea);
-        bottombox.getChildren().addAll(addButton);
 
-        //Set the panes
+        //populate boxes and add to pane
+        vbox.getChildren().addAll(headline, nameBox, blacklistBox, wordsLabel, loadButton, wordsArea);
+        bottombox.getChildren().addAll(addButton);
         pane.setTop(vbox);
         pane.setBottom(bottombox);
-        
-        
 
-        //Button action
+        //Load list button action
+        loadButton.setOnAction((event) -> {
+            FileChooser fileChooser = new FileChooser();
+
+            //set and show load file dialog
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+            fileChooser.getExtensionFilters().add(extFilter);
+            File file = fileChooser.showOpenDialog(stage);
+            String words = "";
+
+            try {
+                words = filelistparser.getListFromFile(file.getCanonicalPath());
+            } catch (IOException | UncheckedIOException ex) {
+                Alert IOerror = new Alert(Alert.AlertType.INFORMATION);
+                IOerror.setTitle("Error");
+                IOerror.setHeaderText(null);
+                IOerror.setContentText("There was an error while loading from file.\n"
+                        + "Please check that the file you are \n"
+                        + "trying to load is in plaintext form.");
+                IOerror.showAndWait();
+            }
+            wordsArea.setText(words);
+        });
+
+        //Add list button action
         addButton.setOnAction((event) -> {
 
             //Get the user-inputted info into variables
             String name = nameField.getText();
+            //if the name is too long, alert the user and do nothing
+            if (name.length() > 50) {
+                Alert lengthalert = new Alert(AlertType.INFORMATION);
+                lengthalert.setTitle("Name too long");
+                lengthalert.setHeaderText(null);
+                lengthalert.setContentText("The maximum lenght of the name is 50 characters.");
+                lengthalert.showAndWait();
+                return;
+            }
+
+            //If the name is empty, set it as "[Unnamed list]"
+            if (name.length() == 0) {
+                name = "[Unnamed list]";
+            }
+
             String words = wordsArea.getText();
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             String blacklistString = (String) blacklistCB.getValue();
@@ -91,20 +137,14 @@ public class GUIaddlist {
                 blacklist = true;
             }
 
-            //Create alert for errors
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setTitle("Database error");
-            alert.setHeaderText(null);
-            alert.setContentText("There was an error while adding the list to the database.");
-
             //Add the list
             try {
                 listparser.addList(name, words, timestamp, blacklist);
-            } catch (IOException ex) {
-                Logger.getLogger(GUIaddlist.class.getName()).log(Level.SEVERE, null, ex);
-                alert.showAndWait();
-            } catch (SQLException ex) {
-                Logger.getLogger(GUIaddlist.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException | SQLException ex) {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Database error");
+                alert.setHeaderText(null);
+                alert.setContentText("There was an error while adding the list to the database.");
                 alert.showAndWait();
             }
             Alert success = new Alert(AlertType.INFORMATION);
@@ -112,7 +152,7 @@ public class GUIaddlist {
             success.setHeaderText(null);
             success.setContentText("Wordlist added successfully.");
             success.showAndWait();
-            
+
             nameField.clear();
             wordsArea.clear();
         });

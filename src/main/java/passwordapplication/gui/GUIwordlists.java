@@ -100,6 +100,8 @@ public class GUIwordlists {
                     info.setHeaderText(null);
                     info.setContentText("There was an error while deleting the list.");
                     info.showAndWait();
+                } catch (StringIndexOutOfBoundsException ex) {
+                    
                 }
 
                 //Refresh view

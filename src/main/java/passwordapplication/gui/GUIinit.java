@@ -40,7 +40,6 @@ public class GUIinit {
         Label headline = new Label("INITIALIZE DATABASE");
         Label guide = new Label("Press the button below, if you wish to initialize the database.\n"
                 + "All tables in the database will be dropped and they will be created again.\n"
-                + "This is necessary when the application is started for the first time, since no database then exists.\n"
                 + "All data in an an existing database will be lost. This cannot be undone.");
         Button initialize = new Button("Initialize database");
         vbox.getChildren().addAll(headline, guide, initialize);

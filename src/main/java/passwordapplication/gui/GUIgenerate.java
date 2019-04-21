@@ -1,6 +1,5 @@
 package passwordapplication.gui;
 
-import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -51,6 +50,7 @@ public class GUIgenerate {
     /**
      * This method creates the view that can be called by the main GUI-class
      *
+     * @param stage the application window
      * @return pane with window-contents
      */
     public Parent getView(Stage stage) {
@@ -73,8 +73,10 @@ public class GUIgenerate {
         ChoiceBox numberCB = new ChoiceBox(FXCollections.observableArrayList(2, 3, 4, 5));
         numberCB.getSelectionModel().selectFirst();
         HBox numberBox = new HBox(numberLabel, numberCB);
-        Label dividerLabel = new Label("Add the dividers you want to use between words in the passwords. Add space between each.\n"
-                + "If none are chosen, '-' will be used");
+        Label dividerLabel = new Label("Add the dividers you want to use between "
+                + "words in the passwords. You can use any printable ASCII characters. Add space between each.\n"
+                + "The maximum lenght is three characters - strings longer than "
+                + "this are discarded. If no acceptable strings are supplied, '-' will be used");
         TextField dividerString = new TextField();
         Button generate = new Button("Generate");
 
@@ -157,7 +159,7 @@ public class GUIgenerate {
                 filelistparser.saveListToFile(file, passwords);
             } catch (IOException ex) {
                 Alert info = new Alert(Alert.AlertType.INFORMATION);
-                info.setTitle("Database error");
+                info.setTitle("Error");
                 info.setHeaderText(null);
                 info.setContentText("There was an error while saving passwords to file.");
             }

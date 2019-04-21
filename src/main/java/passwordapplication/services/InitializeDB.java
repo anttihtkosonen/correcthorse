@@ -1,15 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package passwordapplication.services;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.springframework.stereotype.Component;
 //import passwordapplication.domain.Passwordapplication;
 
@@ -22,6 +15,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class InitializeDB {
 
+    /**
+     * Method to initialize database
+     * @param database lovation of the database to be initialized
+     */
     public static void initialize(String database) {
 
         try (Connection conn = DriverManager.getConnection(database, "sa", "")) {

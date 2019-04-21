@@ -7,12 +7,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -21,143 +22,202 @@ import org.springframework.jdbc.core.RowMapper;
 import passwordapplication.models.Word;
 import passwordapplication.models.Wordlist;
 
+/**
+ * The test class for the BlackwordDAO-class. Unless otherwise commented, the
+ * correct behaviour of class methods is tested by capturing the parameters of
+ * the calls to methods of other classes made by the method being tested, and
+ * comparing them to what is expected.
+ *
+ * @author antti
+ */
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class BlackwordDAOTest {
-    
+
     @Mock
-    Word mockword;
-    
+    Word word;
+
     @Mock
-    Wordlist mockwordlist;
-    
+    Wordlist wordlist;
+
     @Mock
-    JdbcTemplate mockjdbcTemplate;
-    
+    JdbcTemplate jdbcTemplate;
+
     @InjectMocks
     private BlackwordDAO blackworddao = new BlackwordDAO();
 
+    final private String mockword = "mockword";
+    final private Integer mockId = 666;
+    final private ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(String.class);
+    final private ArgumentCaptor<String> wordCaptor = ArgumentCaptor.forClass(String.class);
+    final private ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
+
+    /**
+     * Test for the insert-method.
+     */
     @Test
     public void TestInsert() {
-        when(mockword.getWord()).thenReturn("mock");
-        when(mockword.getWordlist()).thenReturn(mockwordlist);
-        when(mockwordlist.getId()).thenReturn(1);
+        when(word.getWord()).thenReturn(mockword);
+        when(word.getWordlist()).thenReturn(wordlist);
+        when(wordlist.getId()).thenReturn(mockId);
         try {
-            blackworddao.insert(mockword);
+            blackworddao.insert(word);
         } catch (SQLException ex) {
             fail("SQL error");
-        } 
+        }
+        verify(jdbcTemplate).update(any(), nameCaptor.capture(), idCaptor.capture());
+        assertEquals(nameCaptor.getValue(), mockword);
+        assertEquals(idCaptor.getValue(), mockId);
     }
-    
+
+    /**
+     * Test for the the second insert method, that takes the word-parameters
+     * separately.
+     */
     @Test
     public void TestSecondInsert() {
         try {
-            blackworddao.insert("mock", 1);
+            blackworddao.insert(mockword, mockId);
         } catch (SQLException ex) {
             fail("SQL error");
-        } 
+        }
+        verify(jdbcTemplate).update(any(), nameCaptor.capture(), idCaptor.capture());
+        assertEquals(nameCaptor.getValue(), mockword);
+        assertEquals(idCaptor.getValue(), mockId);
     }
-    
+
+    /**
+     * Test for the read-method.
+     */
     @Test
-    public void TestRead(){
-        when(mockjdbcTemplate.queryForObject(anyString(), any(BeanPropertyRowMapper.class), anyInt())).thenReturn(mockword);
+    public void TestRead() {
+        when(jdbcTemplate.queryForObject(anyString(), any(BeanPropertyRowMapper.class), idCaptor.capture())).thenReturn(word);
         Word retVal = new Word();
         try {
-            retVal = blackworddao.read(1);
+            retVal = blackworddao.read(mockId);
         } catch (SQLException ex) {
             fail("SQL error");
         }
-        assertEquals(mockword, retVal);
+        assertEquals(idCaptor.getValue(), mockId);
+        assertEquals(word, retVal);
 
     }
-    
+
+    /**
+     * Test for the deleteListWords-method.
+     */
     @Test
-    public void TestDeleteListWords(){
+    public void TestDeleteListWords() {
         try {
-            blackworddao.deleteListWords(1);
-        } catch (SQLException ex) {
-            fail("SQL error");
-        }         
-    }
-    
-    @Test
-    public void TestFindWhenFound(){
-        List<Integer> mockList = new ArrayList();
-        mockList.add(1);
-        when(mockjdbcTemplate.query(anyString(), any(RowMapper.class), anyString())).thenReturn(mockList);
-        Boolean retVal = null;
-        try {
-            retVal = blackworddao.find("mock");
+            blackworddao.deleteListWords(mockId);
         } catch (SQLException ex) {
             fail("SQL error");
         }
-        
+        verify(jdbcTemplate).update(any(), idCaptor.capture());
+        assertEquals(idCaptor.getValue(), mockId);
+    }
+
+    /**
+     * Test for the find-method, when the word is found.
+     */
+    @Test
+    public void TestFindWhenFound() {
+        List<Integer> mockList = new ArrayList();
+        mockList.add(mockId);
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class), wordCaptor.capture())).thenReturn(mockList);
+        Boolean retVal = null;
+        try {
+            retVal = blackworddao.find(mockword);
+        } catch (SQLException ex) {
+            fail("SQL error");
+        }
+        assertEquals(wordCaptor.getValue(), mockword);
         assertEquals(true, retVal);
     }
-    
-     @Test
-    public void TestFindWhenNotFound(){
+
+    /**
+     * Test for the find-method, when the word is not found.
+     */
+    @Test
+    public void TestFindWhenNotFound() {
         List<Integer> mockList = new ArrayList();
-        when(mockjdbcTemplate.query(anyString(), any(RowMapper.class), anyString())).thenReturn(mockList);
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class), wordCaptor.capture())).thenReturn(mockList);
         Boolean retVal = null;
         try {
-            retVal = blackworddao.find("mock");
+            retVal = blackworddao.find(mockword);
         } catch (SQLException ex) {
             fail("SQL error");
         }
+        assertEquals(wordCaptor.getValue(), mockword);
         assertEquals(retVal, false);
     }
-    
+
+    /**
+     * Test for the count-method.
+     */
     @Test
-    public void TestCount(){
-        when(mockjdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString())).thenReturn(1);
-        int retVal = 0;
+    public void TestCount() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), wordCaptor.capture())).thenReturn(mockId);
+        Integer retVal = 0;
         try {
-            retVal = blackworddao.count("mock");
+            retVal = blackworddao.count(mockword);
         } catch (SQLException ex) {
             fail("SQL error");
         }
-        assertEquals(1, retVal);
+        assertEquals(wordCaptor.getValue(), mockword);
+        assertEquals(mockId, retVal);
     }
-    
-     @Test
-    public void TestListWords(){
+
+    /**
+     * Test for the listWords-method.
+     */
+    @Test
+    public void TestListWords() {
         List<String> mockList = new ArrayList();
         mockList.add("mock");
         mockList.add("list");
-        when(mockjdbcTemplate.query(anyString(), any(RowMapper.class), anyInt())).thenReturn(mockList);
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class), idCaptor.capture())).thenReturn(mockList);
         List<String> retVal = null;
         try {
-            retVal = blackworddao.listWords(1);
+            retVal = blackworddao.listWords(mockId);
         } catch (SQLException ex) {
             fail("SQL error");
         }
+        assertEquals(idCaptor.getValue(), mockId);
         assertEquals(mockList, retVal);
     }
-        
+
+    /**
+     * Test for the listTenStringsFromList-method.
+     */
     @Test
-    public void TestListTenStringsFromList(){
+    public void TestListTenStringsFromList() {
         List<String> mockList = new ArrayList();
         mockList.add("mock");
         mockList.add("list");
-        when(mockjdbcTemplate.query(anyString(), any(RowMapper.class), anyInt())).thenReturn(mockList);
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class), idCaptor.capture())).thenReturn(mockList);
         List<String> retVal = null;
         try {
-            retVal = blackworddao.listTenStringsFromList(1);
+            retVal = blackworddao.listTenStringsFromList(mockId);
         } catch (SQLException ex) {
             fail("SQL error");
         }
+        assertEquals(idCaptor.getValue(), mockId);
         assertEquals(mockList, retVal);
     }
-        
+
+    /**
+     * Test for the getListSize.
+     */
     @Test
-    public void TestGetListSize(){
-        when(mockjdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyInt())).thenReturn(1);
-        int retVal = 0;
+    public void TestGetListSize() {
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), idCaptor.capture())).thenReturn(mockId);
+        Integer retVal = 0;
         try {
-            retVal = blackworddao.getListSize(1);
+            retVal = blackworddao.getListSize(mockId);
         } catch (SQLException ex) {
             fail("SQL error");
         }
-        assertEquals(1, retVal);
+        assertEquals(idCaptor.getValue(), mockId);
+        assertEquals(mockId, retVal);
     }
 }

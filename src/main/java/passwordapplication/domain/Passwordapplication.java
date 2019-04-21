@@ -18,11 +18,19 @@ import passwordapplication.gui.GUI;
 @ComponentScan({"passwordapplication.models"})
 public class Passwordapplication implements CommandLineRunner {
 
+    /**
+     * This method starts the user interface.
+     * @param args
+     */
     public static void main(String[] args) {
-        //SpringApplication.run(Passwordapplication.class);
         GUI.launchApp(GUI.class);
     }
 
+    /**
+     * The standard run method.
+     * @param args
+     * @throws Exception
+     */
     @Override
     public void run(String... args) throws Exception {
         System.out.println("Passwordapplication run");

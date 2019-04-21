@@ -3,14 +3,15 @@ package passwordapplication.dao;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import passwordapplication.models.Wordlist;
+import passwordapplication.services.GeneratedKeyHolderFactory;
 
 /**
  * Wordlistdao is the class that handles the database operations for the
@@ -25,17 +26,19 @@ public class WordlistDAO {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    GeneratedKeyHolderFactory generatedkeyholderfactory;
+
     /**
      * Method for adding a Wordlist-object to the table
      *
      * @param wordlist - the Wordlist-object to be added.
      * @return the primary key of the added list
-     * @throws SQLException
+     * @throws SQLException 
      */
     public Integer insert(Wordlist wordlist) throws SQLException {
-
         //A Keyholder is created for storing the id of the created sql-row.
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+        KeyHolder keyholder = generatedkeyholderfactory.newKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(
                     "INSERT INTO Wordlist"
@@ -46,30 +49,30 @@ public class WordlistDAO {
             stmt.setTimestamp(2, wordlist.getTimestamp());
             stmt.setBoolean(3, wordlist.getBlacklist());
             return stmt;
-        }, keyHolder);
-        int id = keyHolder.getKey().intValue();
+        }, keyholder);
+        int id = (int) keyholder.getKey();
+
         return id;
     }
 
-
     /**
      * Method for reading the blacklist-status of a wordlist.
-     * 
+     *
      * @param id - id (primary key) of the list to be read
      * @return Boolean object, that corresponds to blacklist-status.
      * @throws SQLException
      */
     public Boolean readBlacklistStatus(Integer id) throws SQLException {
-        System.out.println("Wordlistdao id: " + id);
+
         String blacklist = jdbcTemplate.queryForObject(
                 "SELECT blacklist FROM Wordlist WHERE id = ?",
                 String.class, id);
         if (blacklist == "TRUE") {
             return true;
-        }else{
+        } else {
             return false;
         }
-        
+
     }
 
     /**
@@ -77,20 +80,19 @@ public class WordlistDAO {
      * only deletes the information of the list, and not the words on that list.
      *
      * @param list_id - id (primary key) of the list to be delete.
+     * @throws java.sql.SQLException
      */
     public void deleteList(Integer list_id) throws SQLException {
         jdbcTemplate.update("DELETE FROM Wordlist WHERE id = ?", list_id);
     }
 
-    
     /**
      * Method to list the wordlists in the database.
      *
      * @return List of Wordlist-objects
      * @throws SQLException
      */
-    public List<Wordlist> list() throws SQLException {
-
+    public List<Wordlist> list() throws SQLException, BadSqlGrammarException {
         List<Wordlist> wordlist = jdbcTemplate.query(
                 "SELECT * FROM Wordlist",
                 (rs, rowNum) -> new Wordlist(
@@ -98,6 +100,7 @@ public class WordlistDAO {
                         rs.getString("name"),
                         rs.getTimestamp("timestamp"),
                         rs.getBoolean("blacklist")));
+
         return wordlist;
 
     }

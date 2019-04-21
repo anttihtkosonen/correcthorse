@@ -13,6 +13,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import passwordapplication.dao.WhitewordDAO;
 
+/**
+ * Tests of the PasswordGenerator-class.
+ *
+ * @author antti
+ */
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class PasswordGeneratorTest {
 
@@ -25,9 +30,10 @@ public class PasswordGeneratorTest {
     @InjectMocks
     PasswordGenerator passwordgenerator;
 
-    public PasswordGeneratorTest() {
-    }
-
+    /**
+     * Test of the generate-method. The method should return correctly generated
+     * passwords.
+     */
     @Test
     public void testGenerate() {
         System.out.println("generate");
@@ -52,6 +58,10 @@ public class PasswordGeneratorTest {
 
     }
 
+    /**
+     * Test of the getPasswords-method, when database has sufficient words. The
+     * DAO is mocked. The method should return correctly generated passwords.
+     */
     @Test
     public void testGetPasswords() {
         List<String> mockList = new ArrayList();
@@ -80,8 +90,12 @@ public class PasswordGeneratorTest {
         }
         assertEquals(expResult, result);
     }
-    
-        @Test
+
+    /**
+     * Test of the getPasswords-method, when database has insufficient words.
+     * The DAO is mocked. The method should return an empty list.
+     */
+    @Test
     public void testGetPasswordsWhenInsufficientWords() {
         List<String> mockList = new ArrayList();
 
@@ -102,6 +116,29 @@ public class PasswordGeneratorTest {
             fail("SQL error");
         }
         assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of the parseDividers-method. The method should remove unacceptable
+     * dividers from the list provided, and return the shortened list.
+     */
+    @Test
+    public void testParseDividers() {
+        List<String> expectedResult = new ArrayList();
+        expectedResult.add("!");
+        expectedResult.add("2");
+        expectedResult.add("-a-");
+
+        List<String> dividerList = new ArrayList();
+        dividerList.addAll(expectedResult);
+        dividerList.add("++++");
+        dividerList.add("  ");
+        dividerList.add("\u0003");
+        dividerList.add("");
+
+        List<String> result = passwordgenerator.parseDividers(dividerList);
+
+        assertEquals(expectedResult, result);
     }
 
 }

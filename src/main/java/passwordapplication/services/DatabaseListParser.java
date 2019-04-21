@@ -9,8 +9,6 @@ import java.io.StringReader;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,11 +29,9 @@ public class DatabaseListParser {
 
     @Autowired
     BlackwordDAO blackworddao;
-    
-        
+
     @Autowired
     FileListParser filelistparser;
-
 
     /**
      * Method to add a list to the database from a text-file in the filesystem
@@ -70,66 +66,92 @@ public class DatabaseListParser {
         //Add list information to database (to the wordlist-table)
         Wordlist wordlist = new Wordlist(name, timestamp, blacklist);
         int list_id = 0;
-        try {
-            list_id = wordlistdao.insert(wordlist);
-        } catch (SQLException ex) {
-            System.out.println("There was an error while adding the list to the database");
-            return;
-        }
+
+        list_id = wordlistdao.insert(wordlist);
+
         //add words to database
         BufferedReader br = new BufferedReader(new StringReader(words));
         String line;
         //go through each line in list
         while ((line = br.readLine()) != null) {
-            Boolean acceptable = true;
-            //ignore line, if it has other characters besides letters:
-            if (line.length() == 0) {
-                acceptable = false;
-            } else {
-                char[] chars = line.toCharArray();
-                for (char c : chars) {
-                    if (!Character.isLetter(c)) {
-                        acceptable = false;
-                        break;
-                    }
-                }
-            }
-            if (acceptable) {
-                //In case the word is a blacklist word, do the following
-                if (blacklist) {
-                    try {
-                        //insert word into database
-                        blackworddao.insert(line, list_id);
-                    } catch (SQLException ex) {
-                        System.out.println("There was an error while adding the words to the database");
-                        return;
-                    }
-                    //after adding change all instances of the word inactive in whitelist
-                    whiteworddao.setInactive(line);
+            this.parseLine(line, blacklist, list_id);
+        }
 
-                } //In case the word is a whitelist word, to the following
-                else {
-                    try {
-                        Boolean status;
-                        //check if the word is on the blacklist, and set status active or inactive accordingly
-                        if (blackworddao.find(line)) {
-                            status = false;
-                        } else {
-                            status = true;
-                        }
-                        //insert word into database
-                        whiteworddao.insert(line, status, list_id);
+    }
 
-                    } catch (SQLException ex) {
-                        Logger.getLogger(DatabaseListParser.class.getName()).log(Level.SEVERE, null, ex);
-                        System.out.println("There was a database error while adding the words to the database");
-                        return;
-                    }
-
+    /**
+     * Method to add a word to the database. The method first checks if the word
+     * is acceptable to be added, and if it is, it is added to one of the two
+     * database tables for words. Only Ascii letters are accepted in a word - if
+     * a character that is not an ascii letter is present in a word, the word is
+     * rejected completely. Also words longer than 30 characters are rejected.
+     *
+     * @param word the word to be added
+     * @param blacklist shows if the letter is to be added to the blacklist
+     * table (true), or the whiteword table (false)
+     * @param list_id the id of the wordlist this word belongs to
+     * @throws SQLException
+     */
+    public void parseLine(String word, Boolean blacklist, Integer list_id) throws SQLException {
+        Boolean acceptable = true;
+        //ignore line, if it is empty, if it is over 30 characters long or 
+        //it has other characters besides letters:
+        if (word.length() == 0 || word.length() > 30) {
+            acceptable = false;
+        } else {
+            char[] chars = word.toCharArray();
+            for (char c : chars) {
+                if (!isAsciiLetter(c)) {
+                    acceptable = false;
+                    break;
                 }
             }
         }
-        System.out.println("List successfully added.");
+        if (acceptable) {
+            //In case the word is a blacklist word, do the following
+            if (blacklist) {
+
+                //insert word into database
+                blackworddao.insert(word, list_id);
+
+                //after adding, change all instances of the word inactive in the whitelist
+                whiteworddao.setInactive(word);
+
+            } //In case the word is a whitelist word, to the following
+            else {
+
+                Boolean status;
+                //check if the word is on the blacklist, and set status active or inactive accordingly
+                if (blackworddao.find(word)) {
+                    status = false;
+                } else {
+                    status = true;
+                }
+                //insert word into database
+                whiteworddao.insert(word, status, list_id);
+
+            }
+        }
+    }
+
+    /**
+     * Method to check whether a character is an ascii letter. Only large
+     * letters (ascii decimals 65-90) and small letters (ascii decimals 97-122)
+     * return a true value.
+     *
+     * @param c the character to assess
+     */
+    private static Boolean isAsciiLetter(char c) {
+        //Large ascii letters are accepted
+        if (c >= 65 && c <= 90) {
+            return true;
+        } //Small ascii letters are accepted
+        else if (c >= 97 && c <= 122) {
+            return true;
+        } //Everything else is rejected
+        else {
+            return false;
+        }
     }
 
     /**
@@ -139,7 +161,7 @@ public class DatabaseListParser {
      * @throws SQLException
      */
     public void removeList(Integer id) throws SQLException {
-        //get the wordlist-object
+        //get the blacklist-status of the wordlist
         Boolean blacklist = wordlistdao.readBlacklistStatus(id);
 
         // If the wordlist is a blacklist, we need to a check for each word if it belongs to another blacklist
@@ -163,7 +185,5 @@ public class DatabaseListParser {
         //finally we just remove the wordlist from the wordlist-table
         wordlistdao.deleteList(id);
     }
-    
-
 
 }
