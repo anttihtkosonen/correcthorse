@@ -1,4 +1,4 @@
 /database/
 /nbproject/
-/documentaatio/javadocs
+/target/apidocs
 /src//main/java/passwordapplication/domain/Textinterface.java
