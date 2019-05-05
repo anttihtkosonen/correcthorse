@@ -15,9 +15,11 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-To use this application you need to have the Java JRE 8 which can be downdloaded here: https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
+To use this application you need to have the Java JRE 8 which can be downdloaded here: 
+https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html
 
-You also need the H2 database engine, which you can get here: https://h2database.com/html/main.html
+You also need the H2 database engine, which you can get here: 
+https://h2database.com/html/main.html
 
 This application has only been tested on a linux-system – it might not work correctly on other systems.
 
@@ -50,7 +52,7 @@ java -jar Passwordapplication-1.0-SNAPSHOT.jar
 
 ## Authors
 
-* **Antti Kosonen** (https://h2database.com/html/main.html)
+* **Antti Kosonen** (https://github.com/anttihtkosonen)
 
 
 ## License

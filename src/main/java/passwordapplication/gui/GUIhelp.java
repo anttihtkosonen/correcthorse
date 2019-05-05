@@ -48,7 +48,14 @@ public class GUIhelp {
                 + "2. Use the dropdown menus to select how many passwords you want to generate, and how many words should be in a password\n"
                 + "3. In the text field add the characters that you want to use in the password between words. These will be used randomly.\n"
                 + "4. Press “Generate”\n"
-                + "5. After the passwords have been generated, you can save them to a file by pressing “Save to file” at the bottom of the window");
+                + "5. After the passwords have been generated, you can save them to a file by pressing “Save to file” at the bottom of the window\n\n"
+                + "The application also calculates the entropy of each password. The number represents the theoretical minimum number of bits\n"
+                + "required to store the password in memory – it is the Shannon-entropy of the characters rounded up and multiplied by the number\n"
+                + "of characters. As a rule of thumb a larger number is the better. It should be noted however, that a large number of bits itself\n"
+                + "does not ensure that the password is strong – the words used should also be uncommon, otherwise the password is vulnerable to\n"
+                + "dictionary-based attacks where an attacker uses lists of common words to brute-force the password. Use of rare or specialized\n"
+                + "words is strongly recommended."
+        );
         vbox.getChildren().addAll(guide);
         pane.setTop(vbox);
 

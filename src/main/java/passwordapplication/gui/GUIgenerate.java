@@ -16,10 +16,11 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -28,6 +29,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import passwordapplication.models.Password;
 import passwordapplication.services.FileListParser;
 import passwordapplication.services.PasswordGenerator;
 
@@ -45,7 +47,7 @@ public class GUIgenerate {
     @Autowired
     FileListParser filelistparser;
 
-    List<String> passwords = new ArrayList();
+    List<Password> passwords = new ArrayList();
 
     /**
      * This method creates the view that can be called by the main GUI-class
@@ -117,31 +119,38 @@ public class GUIgenerate {
                 Alert nowords = new Alert(Alert.AlertType.INFORMATION);
                 nowords.setTitle("Insufficient words");
                 nowords.setHeaderText(null);
-                nowords.setContentText("There are not enough words in the database"+
-                        " to create the requested set of passwords.");
+                nowords.setContentText("There are not enough words in the database"
+                        + " to create the requested set of passwords.");
                 nowords.showAndWait();
+            } else {
+                //Create table for results
+                TableView output = new TableView();
+                output.setEditable(true);
+
+                TableColumn passwordCol = new TableColumn("Password");
+                passwordCol.setMinWidth(400);
+                passwordCol.setCellValueFactory(
+                        new PropertyValueFactory<Password, String>("password")
+                );
+
+                TableColumn entropyCol = new TableColumn("Entropy [bits]");
+                entropyCol.setMinWidth(200);
+                entropyCol.setCellValueFactory(
+                        new PropertyValueFactory<Password, Integer>("entropy")
+                );
+
+                //populate the table with the results and show it
+                ObservableList<Password> observableList = FXCollections.observableArrayList(passwords);
+                output.setItems(observableList);
+                output.getColumns().addAll(passwordCol, entropyCol);
+                pane.setCenter(output);
+
+                //create button for saving list
+                VBox bottom = new VBox();
+                bottom.setPadding(new Insets(15, 15, 15, 15));
+                bottom.getChildren().addAll(save);
+                pane.setBottom(bottom);
             }
-
-            //Create pane for results
-            ScrollPane output = new ScrollPane();
-            output.setFitToHeight(true);
-            output.setFitToWidth(true);
-            output.setMaxHeight(500);
-            output.setMinHeight(400);
-
-            //Create result list and show it
-            ListView<String> listview = new ListView();
-            ObservableList<String> observablelist = FXCollections.observableList(passwords);
-            listview.setItems(observablelist);
-            output.setContent(new Label("Generated passwords"));
-            output.setContent(listview);
-            pane.setCenter(output);
-
-            //create button for saving list
-            VBox bottom = new VBox();
-            bottom.setPadding(new Insets(15, 15, 15, 15));
-            bottom.getChildren().addAll(save);
-            pane.setBottom(bottom);
 
         });
 
@@ -163,6 +172,11 @@ public class GUIgenerate {
                 info.setHeaderText(null);
                 info.setContentText("There was an error while saving passwords to file.");
             }
+            Alert success = new Alert(Alert.AlertType.INFORMATION);
+            success.setTitle("File saved");
+            success.setHeaderText(null);
+            success.setContentText("File saved successfully");
+            success.showAndWait();
 
         });
 

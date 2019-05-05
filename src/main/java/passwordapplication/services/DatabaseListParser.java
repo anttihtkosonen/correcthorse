@@ -3,11 +3,11 @@ package passwordapplication.services;
 import passwordapplication.dao.*;
 import passwordapplication.models.Wordlist;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,24 +34,6 @@ public class DatabaseListParser {
     FileListParser filelistparser;
 
     /**
-     * Method to add a list to the database from a text-file in the filesystem
-     *
-     * @param name - name for the list (added to the Wordlist-table)
-     * @param location - location of the textfile in the filesystem
-     * @param timestamp - when the list was added to database
-     * @param blacklist - the information of whether this is a blacklist
-     * (true/false)
-     * @throws FileNotFoundException if the textfile is not found
-     * @throws IOException
-     * @throws java.sql.SQLException
-     */
-    public void addListFromFile(String name, String location, Timestamp timestamp, Boolean blacklist) throws FileNotFoundException, IOException, SQLException {
-
-        String words = filelistparser.getListFromFile(location);
-        this.addList(name, words, timestamp, blacklist);
-    }
-
-    /**
      * Method to add a list to the database from a list of words
      *
      * @param name - name for the list (added to the Wordlist-table)
@@ -59,8 +41,9 @@ public class DatabaseListParser {
      * @param timestamp - when the list was added to database
      * @param blacklist - the information of whether this is a blacklist
      * (true/false)
-     * @throws IOException
-     * @throws java.sql.SQLException
+     * @throws IOException if there was a filesystem error during the operation
+     * @throws java.sql.SQLException if there was a database error during the
+     * operation
      */
     public void addList(String name, String words, Timestamp timestamp, Boolean blacklist) throws IOException, SQLException {
         //Add list information to database (to the wordlist-table)
@@ -72,65 +55,103 @@ public class DatabaseListParser {
         //add words to database
         BufferedReader br = new BufferedReader(new StringReader(words));
         String line;
-        //go through each line in list
+        Boolean acceptable;
+        List<String> addedWords = new ArrayList();
+        //go through each line in list and add the word if it has not been added before
         while ((line = br.readLine()) != null) {
-            this.parseLine(line, blacklist, list_id);
+            acceptable = false;
+            acceptable = this.parseLine(line, blacklist, list_id, addedWords);
+            if (acceptable) {
+                addedWords.add(line);
+            }
         }
 
     }
 
     /**
-     * Method to add a word to the database. The method first checks if the word
-     * is acceptable to be added, and if it is, it is added to one of the two
-     * database tables for words. Only Ascii letters are accepted in a word - if
-     * a character that is not an ascii letter is present in a word, the word is
-     * rejected completely. Also words longer than 30 characters are rejected.
+     * Method to check the validity of a word, and adding it to the database if
+     * it is valid. The method first checks if the word is valid to be added,
+     * and if it is, addWord is called to add it to the database. Only ASCII
+     * letters are accepted in a word - if a character that is not an ASCII
+     * letter is present in a word, the word is rejected completely. Also words
+     * longer than 30 characters are rejected. The method also takes in a list
+     * of strings that should not be added to the database, and rejects any
+     * strings on this list.
      *
      * @param word the word to be added
      * @param blacklist shows if the letter is to be added to the blacklist
      * table (true), or the whiteword table (false)
      * @param list_id the id of the wordlist this word belongs to
-     * @throws SQLException
+     * @param unacceptableWords list of words that should be rejected
+     * @return Boolean-value of whether the String passed the checks and was
+     * added.
+     * @throws SQLException if there was a database error during the operation
      */
-    public void parseLine(String word, Boolean blacklist, Integer list_id) throws SQLException {
+    public Boolean parseLine(String word, Boolean blacklist, Integer list_id, List<String> unacceptableWords) throws SQLException {
         Boolean acceptable = true;
+        //strip whitespaces from string
+        word = word.replaceAll("\\s+", "");
+
+        //if the word is on the list of unacceptable words, ignore it
+        if (unacceptableWords.contains(word)) {
+            acceptable = false;
+        }
         //ignore line, if it is empty, if it is over 30 characters long or 
         //it has other characters besides letters:
-        if (word.length() == 0 || word.length() > 30) {
-            acceptable = false;
-        } else {
-            char[] chars = word.toCharArray();
-            for (char c : chars) {
-                if (!isAsciiLetter(c)) {
-                    acceptable = false;
-                    break;
+        if (acceptable) {
+            if (word.length() == 0 || word.length() > 30) {
+                acceptable = false;
+            } else {
+                char[] chars = word.toCharArray();
+                for (char c : chars) {
+                    if (!isAsciiLetter(c)) {
+                        acceptable = false;
+                        break;
+                    }
                 }
             }
         }
+        //if the word is acceptable, add it to the database
         if (acceptable) {
-            //In case the word is a blacklist word, do the following
-            if (blacklist) {
+            this.addWord(word, blacklist, list_id);
+        }
+        return acceptable;
+    }
 
-                //insert word into database
-                blackworddao.insert(word, list_id);
+    /**
+     * Method to add a word to the database. For a blacklist word, any matching
+     * whitelist words are also set to inactive. For a whitelist word, the
+     * blackword-table is checked to determine activity status.
+     *
+     * @param word the word to be added
+     * @param blacklist shows if the letter is to be added to the blacklist
+     * table (true), or the whiteword table (false)
+     * @param list_id the id of the wordlist this word belongs to
+     * @throws SQLException if there was a database error during the operation
+     */
+    public void addWord(String word, Boolean blacklist, Integer list_id) throws SQLException {
+        //In case the word is a blacklist word, do the following
+        if (blacklist) {
 
-                //after adding, change all instances of the word inactive in the whitelist
-                whiteworddao.setInactive(word);
+            //insert word into database
+            blackworddao.insert(word, list_id);
 
-            } //In case the word is a whitelist word, to the following
-            else {
+            //after adding, change all instances of the word inactive in the whitelist
+            whiteworddao.setInactive(word);
 
-                Boolean status;
-                //check if the word is on the blacklist, and set status active or inactive accordingly
-                if (blackworddao.find(word)) {
-                    status = false;
-                } else {
-                    status = true;
-                }
-                //insert word into database
-                whiteworddao.insert(word, status, list_id);
+        } //In case the word is a whitelist word, to the following
+        else {
 
+            Boolean status;
+            //check if the word is on the blacklist, and set status active or inactive accordingly
+            if (blackworddao.find(word)) {
+                status = false;
+            } else {
+                status = true;
             }
+            //insert word into database
+            whiteworddao.insert(word, status, list_id);
+
         }
     }
 
@@ -141,7 +162,7 @@ public class DatabaseListParser {
      *
      * @param c the character to assess
      */
-    private static Boolean isAsciiLetter(char c) {
+    static Boolean isAsciiLetter(char c) {
         //Large ascii letters are accepted
         if (c >= 65 && c <= 90) {
             return true;

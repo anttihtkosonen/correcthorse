@@ -3,7 +3,6 @@ package passwordapplication.dao;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -34,7 +33,7 @@ public class WordlistDAO {
      *
      * @param wordlist - the Wordlist-object to be added.
      * @return the primary key of the added list
-     * @throws SQLException 
+     * @throws SQLException  if there was a database error during the operation
      */
     public Integer insert(Wordlist wordlist) throws SQLException {
         //A Keyholder is created for storing the id of the created sql-row.
@@ -60,7 +59,7 @@ public class WordlistDAO {
      *
      * @param id - id (primary key) of the list to be read
      * @return Boolean object, that corresponds to blacklist-status.
-     * @throws SQLException
+     * @throws SQLException if there was a database error during the operation
      */
     public Boolean readBlacklistStatus(Integer id) throws SQLException {
 
@@ -80,7 +79,7 @@ public class WordlistDAO {
      * only deletes the information of the list, and not the words on that list.
      *
      * @param list_id - id (primary key) of the list to be delete.
-     * @throws java.sql.SQLException
+     * @throws java.sql.SQLException if there was a database error during the operation
      */
     public void deleteList(Integer list_id) throws SQLException {
         jdbcTemplate.update("DELETE FROM Wordlist WHERE id = ?", list_id);
@@ -90,7 +89,7 @@ public class WordlistDAO {
      * Method to list the wordlists in the database.
      *
      * @return List of Wordlist-objects
-     * @throws SQLException
+     * @throws SQLException if there was a database error during the operation
      */
     public List<Wordlist> list() throws SQLException, BadSqlGrammarException {
         List<Wordlist> wordlist = jdbcTemplate.query(

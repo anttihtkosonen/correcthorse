@@ -1,6 +1,5 @@
 package passwordapplication.gui;
 
-import static java.lang.Boolean.TRUE;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import javafx.geometry.Insets;
@@ -72,7 +71,7 @@ public class GUI extends FxApplicationSupport {
         HBox menu = new HBox();
         menu.setPadding(new Insets(15, 15, 15, 15));
         menu.setSpacing(10);
-        Button generateButton = new Button("Generate password");
+        Button generateButton = new Button("Generate passwords");
         Button wordlistsButton = new Button("Wordlists");
         Button addlistButton = new Button("Add wordlist");
         Button initButton = new Button("Initialize database");

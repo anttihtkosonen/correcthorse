@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;

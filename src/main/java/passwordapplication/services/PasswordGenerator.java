@@ -3,10 +3,13 @@ package passwordapplication.services;
 import passwordapplication.dao.WhitewordDAO;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import passwordapplication.models.Password;
 
 /**
  * Class for generating passwords.
@@ -33,9 +36,10 @@ public class PasswordGenerator {
      *
      * @throws java.sql.SQLException
      */
-    public List<String> getPasswords(Integer amount, Integer wordnumber, List<String> dividers) throws SQLException {
-        //Initialize list
-        List<String> passwords = new ArrayList();
+    public List<Password> getPasswords(Integer amount, Integer wordnumber, List<String> dividers) throws SQLException {
+        //Initialize lists
+        List<String> passwordStrings = new ArrayList();
+        List<Password> passwords = new ArrayList();
 
         //Get the needed number of words from database
         ArrayList<String> words = whiteworddao.listNActiveStrings(wordnumber * amount);
@@ -51,8 +55,18 @@ public class PasswordGenerator {
         //Parse the dividers-list to match rewuirements.
         dividers = this.parseDividers(dividers);
 
-        //get passwprds
-        passwords = this.generate(amount, wordnumber, words, dividers);
+        //get password-strings
+        passwordStrings = this.generate(amount, wordnumber, words, dividers);
+
+        //create Password-objects of the strings, and add them to the list
+        for (int i = 0; i < amount; i++) {
+            passwords.add(
+                    new Password(
+                            passwordStrings.get(i), 
+                            this.entropyCalculator(passwordStrings.get(i))
+                    )
+            );  
+        }
         return passwords;
     }
 
@@ -103,7 +117,7 @@ public class PasswordGenerator {
             st = st.replaceAll("\\s+", "");
 
             //if the string is empty or too long, mark as unacceptable
-            if (st.length() > 3  || st.length() == 0) {
+            if (st.length() > 3 || st.length() == 0) {
                 acceptable = false;
             }
 
@@ -132,5 +146,45 @@ public class PasswordGenerator {
             output.add("-");
         }
         return output;
+    }
+
+    /**
+     * A method for calculating the entropy of a string. The method returns the
+     * minimum number of bits needed to encode the string optimally, which
+     * indicates string complexity. The higher the number, the better the
+     * password.
+     *
+     * @param st string to calculate
+     * @return number of bits
+     */
+    public Integer entropyCalculator(String st) {
+        //get the number of occurrences of each character in the string
+        Map<Character, Integer> map = new HashMap<Character, Integer>();
+        char[] chars = st.toCharArray();
+        for (char c : chars) {
+            //System.out.println("c :"+c);
+            if (!map.containsKey(c)) {
+                map.put(c, 0);
+            }
+            map.put(c, map.get(c) + 1);
+        }
+
+        // use the number of occurrences and the string lenght to calculate 
+        // the Shannon entropy of the character
+        Double shannon = 0.0;
+        for (Character c : map.keySet()) {
+            double occurrences = (double) map.get(c);
+            //System.out.println("occurrences :"+occurrences);
+            Double propability = occurrences / st.length();
+            //System.out.println("frequency :"+frequency);
+            shannon -= (propability * (Math.log(propability) / Math.log(2)));
+        }
+
+        // The number of bits needed is the Shannon entropy rounded up, times
+        // the number of characters.
+        Integer bitsPerChar = (int) Math.round(shannon);
+        Integer entropy = bitsPerChar * st.length();
+        return entropy;
+
     }
 }

@@ -14,10 +14,11 @@ import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
+import static org.mockito.Mockito.mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import passwordapplication.models.Password;
 
 /**
  * Tests of the FileListParser-class.
@@ -49,12 +50,19 @@ public class FileListParserTest {
      */
     @Test
     public void testSaveListToFile() {
-        List<String> mocklist = new ArrayList();
-        mocklist.add("some");
-        mocklist.add("mock");
-        mocklist.add("words");
-        List<String> resultList = new ArrayList();
+
+        List<String> expResultList = new ArrayList();
+        expResultList.add("some");
+        expResultList.add("mock");
+        expResultList.add("words");
+
+        List<Password> mocklist = new ArrayList();
+        mocklist.add(new Password("some", 5));
+        mocklist.add(new Password("mock", 5));
+        mocklist.add(new Password("words", 5));
+
         File file;
+        List<String> resultList = new ArrayList();
         try {
             file = savefolder.newFile("testfile.txt");
             filelistparser.saveListToFile(file, mocklist);
@@ -63,7 +71,24 @@ public class FileListParserTest {
         } catch (IOException ex) {
             fail("SQLException");
         }
-        assertEquals(mocklist, resultList);
+        assertEquals(expResultList, resultList);
+    }
+
+    /**
+     * Test of the saveListToFile-method, when the File is null.
+     */
+    @Test
+    public void testSaveListToNullFile() {
+        List<Password> mocklist = mock(ArrayList.class);
+        File file = null;
+
+        try {
+            filelistparser.saveListToFile(file, mocklist);
+            fail( "The method should have thrown an exception" );
+        } catch (IOException ex) {
+            //If exception is thrown, the test is passed
+        }
+
     }
 
     /**

@@ -1,7 +1,5 @@
 package passwordapplication.models;
 
-import passwordapplication.models.Word;
-import passwordapplication.models.Wordlist;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.runner.RunWith;

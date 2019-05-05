@@ -31,8 +31,7 @@ public class WhitewordDAO {
      * Method for adding a whiteword-object to the table
      *
      * @param word - the whiteword-object to be added
-     * @throws SQLException if there was a database error during the
-     * operation
+     * @throws SQLException if there was a database error during the operation
      */
     public void insert(Whiteword word) throws SQLException {
         jdbcTemplate.update("INSERT INTO Whiteword"
@@ -51,8 +50,7 @@ public class WhitewordDAO {
      * @param active - the Boolean value, of whether the word is active (can be
      * used in password)
      * @param list_id - the id of the list the word belongs to
-     * @throws SQLException if there was a database error during the
-     * operation
+     * @throws SQLException if there was a database error during the operation
      */
     public void insert(String word, Boolean active, int list_id) throws SQLException {
         jdbcTemplate.update("INSERT INTO Whiteword"
@@ -66,8 +64,7 @@ public class WhitewordDAO {
      *
      * @param id - id (primary key) of the word to be read
      * @return whiteword-object
-     * @throws SQLException if there was a database error during the
-     * operation
+     * @throws SQLException if there was a database error during the operation
      */
     public Whiteword read(Integer id) throws SQLException {
         Whiteword word = jdbcTemplate.queryForObject("SELECT * FROM Whiteword WHERE id = ?",
@@ -83,8 +80,7 @@ public class WhitewordDAO {
      *
      * @param id - id (primary key) of the word to be read
      * @return Pair with word and activity (Boolean)
-     * @throws SQLException if there was a database error during the
-     * operation
+     * @throws SQLException if there was a database error during the operation
      */
     public Pair readNameAndActive(Integer id) throws SQLException {
         Pair result = jdbcTemplate.queryForObject(
@@ -152,8 +148,7 @@ public class WhitewordDAO {
      *
      * @param list_id - id-number of the list to list the words from
      * @return List of strings
-     * @throws SQLException if there was a database error during the
-     * operation
+     * @throws SQLException if there was a database error during the operation
      */
     public List<String> listTenStringsFromList(Integer list_id) throws SQLException {
         List<String> stringlist = jdbcTemplate.query(
@@ -173,8 +168,7 @@ public class WhitewordDAO {
      * @param n - number of strings to retrieve
      * @return ArrayList of strings. An empty list is returned, if there are an
      * insufficient number of words in the database
-     * @throws SQLException if there was a database error during the
-     * operation
+     * @throws SQLException if there was a database error during the operation
      */
     public ArrayList<String> listNActiveStrings(Integer n) throws SQLException {
         //initialize arraylist
@@ -191,9 +185,21 @@ public class WhitewordDAO {
         //random numbers are not generated later
         Integer maxId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM Whiteword", Integer.class);
 
-        //Iterate through the steps until enough valid strings have been gathered     
+        /*
+        Iterate through the steps until enough valid strings have been gathered. 
+        The maximum number of iterations is 10n - if this is reached, it is 
+        assumed that there are not enough unique active words in the database, 
+        and an empty list is therefore returned.
+         */
         int m = 0;
+        int iteration = 0;
         while (m < n) {
+            iteration++;
+            //Check if limit has been reached
+            if (iteration == 10 * n) {
+                return new ArrayList();
+            }
+
             //word is initialized with dummy value
             Pair word = new Pair("dummy", false);
             Boolean wordOK = false;
@@ -217,7 +223,7 @@ public class WhitewordDAO {
                 Boolean ok = true;
                 //Iterate through the list of words drawn before, ignore this word if it is on list already
                 for (int i = 0; i < list.size(); i++) {
-                    if (list.get(i) == wordString) {
+                    if (list.get(i).equals(wordString)) {
                         ok = false;
                     }
                 }
@@ -238,8 +244,7 @@ public class WhitewordDAO {
      *
      * @param list_id - the list to find the information for
      * @return the number of rows in the list
-     * @throws SQLException if there was a database error during the
-     * operation
+     * @throws SQLException if there was a database error during the operation
      */
     public Integer getListSize(Integer list_id) throws SQLException {
         Integer size = jdbcTemplate.queryForObject(

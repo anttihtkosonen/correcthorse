@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import passwordapplication.dao.WhitewordDAO;
+import passwordapplication.models.Password;
 
 /**
  * Tests of the PasswordGenerator-class.
@@ -59,8 +60,9 @@ public class PasswordGeneratorTest {
     }
 
     /**
-     * Test of the getPasswords-method, when database has sufficient words. The
-     * DAO is mocked. The method should return correctly generated passwords.
+     * Test of the getPasswords- and entropyCalculator-methods, when database
+     * has sufficient words. The DAO is mocked. The method should return
+     * correctly generated passwords and correct entropies for these.
      */
     @Test
     public void testGetPasswords() {
@@ -79,16 +81,21 @@ public class PasswordGeneratorTest {
         Integer amount = 2;
         Integer wordnumber = 2;
         ArrayList<String> dividers = new ArrayList();
-        List<String> expResult = new ArrayList();
-        expResult.add("mock1-mock2");
-        expResult.add("mock3-mock4");
-        List<String> result = new ArrayList();
+
+        List<Password> expResult = new ArrayList();
+        expResult.add(new Password("mock1-mock2", 33));
+        expResult.add(new Password("mock3-mock4", 33));
+        List<Password> result = new ArrayList();
         try {
             result = passwordgenerator.getPasswords(amount, wordnumber, dividers);
         } catch (SQLException ex) {
             fail("SQL error");
         }
-        assertEquals(expResult, result);
+        for (int i = 0; i < result.size(); i++) {
+            assertEquals(expResult.get(i).getPassword(), result.get(i).getPassword());
+            assertEquals(expResult.get(i).getEntropy(), result.get(i).getEntropy());
+        }
+
     }
 
     /**
@@ -108,8 +115,8 @@ public class PasswordGeneratorTest {
         Integer amount = 2;
         Integer wordnumber = 2;
         ArrayList<String> dividers = new ArrayList();
-        List<String> expResult = new ArrayList();
-        List<String> result = new ArrayList();
+        List<Password> expResult = new ArrayList();
+        List<Password> result = new ArrayList();
         try {
             result = passwordgenerator.getPasswords(amount, wordnumber, dividers);
         } catch (SQLException ex) {
@@ -135,6 +142,7 @@ public class PasswordGeneratorTest {
         dividerList.add("  ");
         dividerList.add("\u0003");
         dividerList.add("");
+        dividerList.add("¤");
 
         List<String> result = passwordgenerator.parseDividers(dividerList);
 

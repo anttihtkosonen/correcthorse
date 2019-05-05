@@ -43,7 +43,7 @@ public class BlackwordDAOTest {
     JdbcTemplate jdbcTemplate;
 
     @InjectMocks
-    private BlackwordDAO blackworddao = new BlackwordDAO();
+    final private BlackwordDAO blackworddao = new BlackwordDAO();
 
     final private String mockword = "mockword";
     final private Integer mockId = 666;

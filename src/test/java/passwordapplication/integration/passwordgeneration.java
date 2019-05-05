@@ -7,7 +7,6 @@ import java.util.List;
 import javafx.util.Pair;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.AdditionalAnswers;
@@ -24,6 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.junit4.SpringRunner;
 import passwordapplication.dao.WhitewordDAO;
+import passwordapplication.models.Password;
 import passwordapplication.services.PasswordGenerator;
 
 /**
@@ -80,7 +80,7 @@ public class passwordgeneration {
         dividers.add("?");
         dividers.add("@");
 
-        List<String> result = new ArrayList();
+        List<Password> result = new ArrayList();
         try {
             result = passwordgenerator.getPasswords(amount, wordnumber, dividers);
         } catch (SQLException ex) {
@@ -90,9 +90,18 @@ public class passwordgeneration {
         Integer resultlength = result.size();
         assertEquals(amount, resultlength);
 
-        //go through the list, and check the passwords
+        //go through the list, and check that the the passwords are sound
         for (int i = 0; i < amount; i++) {
-
+            if (
+                    result.get(i) == null || 
+                    result.get(i).getPassword().length() < 6 || 
+                    result.get(i).getPassword() == null || 
+                    result.get(i).getEntropy() < 12 ||
+                    result.get(i).getEntropy() > 65 ||
+                    result.get(i).getEntropy() == null
+                    ) {
+                fail("Unsound passwords");
+            }
         }
 
     }

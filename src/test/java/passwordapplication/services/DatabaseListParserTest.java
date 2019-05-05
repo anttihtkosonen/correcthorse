@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,10 +27,11 @@ import passwordapplication.dao.WordlistDAO;
 import passwordapplication.models.Wordlist;
 
 /**
- * Tests of the DatabaseListParserClass. Unless otherwise commented, the
- * correct behaviour of class methods is tested by capturing the parameters of
- * the calls to methods of other classes made by the method being tested, and
- * comparing them to what is expected.
+ * Tests of the DatabaseListParserClass. Unless otherwise commented, the correct
+ * behaviour of class methods is tested by capturing the parameters of the calls
+ * to methods of other classes made by the method being tested, and comparing
+ * them to what is expected.
+ *
  * @author antti
  */
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -55,50 +57,33 @@ public class DatabaseListParserTest {
     DatabaseListParser databaselistparser;
 
     final private String mockname = "mockname";
-    final private String mocklist = "mock1\nmock2";
+    final private String mocklist = "Mockone\nmocktwo\nmocktwo";
     final private String mocklocation = "/home/user/mock.txt";
     final private Timestamp mockstamp = new Timestamp(123456789);
     final private Boolean mockblacklist = false;
     final private Integer mockId = 666;
+    final private ArrayList mockList = mock(ArrayList.class);
     final private ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(String.class);
     final private ArgumentCaptor<String> listCaptor = ArgumentCaptor.forClass(String.class);
     final private ArgumentCaptor<Timestamp> timeCaptor = ArgumentCaptor.forClass(Timestamp.class);
     final private ArgumentCaptor<Boolean> booleanCaptor = ArgumentCaptor.forClass(Boolean.class);
     final private ArgumentCaptor<String> wordCaptor = ArgumentCaptor.forClass(String.class);
     final private ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
-
-    /**
-     * Test of the addListFromFile-method.
-     */
-    @Test
-    public void testAddListFromFile() {
-        when(filelistparser.getListFromFile(any(String.class))).thenReturn(mocklist);
-        try {
-            databaselistparser.addListFromFile(mockname, mocklocation, mockstamp, mockblacklist);
-            doNothing().when(databaselistparser).addList(any(), any(), any(), any());
-            verify(databaselistparser).addList(nameCaptor.capture(), listCaptor.capture(), timeCaptor.capture(), booleanCaptor.capture());
-        } catch (IOException ex) {
-            fail("IOException");
-        } catch (SQLException ex) {
-            fail("SQLException");
-        }
-
-        assertEquals(nameCaptor.getValue(), mockname);
-        assertEquals(listCaptor.getValue(), mocklist);
-        assertEquals(timeCaptor.getValue(), mockstamp);
-        assertEquals(booleanCaptor.getValue(), mockblacklist);
-    }
+    final private ArgumentCaptor<List<String>> ListCaptor = ArgumentCaptor.forClass(ArrayList.class);
 
     /**
      * Test of the addList-method.
      */
     @Test
     public void testAddList() {
+        List<String> mockUnAcceptable = new ArrayList();
+        mockUnAcceptable.add("Mockone");
+        mockUnAcceptable.add("mocktwo");
         try {
             when(wordlistdao.insert(any(Wordlist.class))).thenReturn(mockId);
             databaselistparser.addList(mockname, mocklist, mockstamp, mockblacklist);
-            doNothing().when(databaselistparser).parseLine(any(), any(), any());
-            verify(databaselistparser, times(2)).parseLine(wordCaptor.capture(), booleanCaptor.capture(), idCaptor.capture());
+            //when(databaselistparser.parseLine(any(), any(), any())).thenReturn(false);
+            verify(databaselistparser, times(3)).parseLine(wordCaptor.capture(), booleanCaptor.capture(), idCaptor.capture(), ListCaptor.capture());
         } catch (IOException ex) {
             fail("IOException");
         } catch (SQLException ex) {
@@ -106,23 +91,25 @@ public class DatabaseListParserTest {
         }
 
         List<String> capturedList = wordCaptor.getAllValues();
-        assertEquals(capturedList.get(0), "mock1");
-        assertEquals(capturedList.get(1), "mock2");
+        assertEquals(capturedList.get(0), "Mockone");
+        assertEquals(capturedList.get(1), "mocktwo");
+        assertEquals(capturedList.get(2), "mocktwo");
         assertEquals(booleanCaptor.getValue(), mockblacklist);
         assertEquals(idCaptor.getValue(), mockId);
+        assertEquals(ListCaptor.getValue(), mockUnAcceptable);
 
     }
 
     /**
-     * Test of the parseLine-method, when the word is a whiteword and active.
+     * Test of the addWord-method, when the word is a whiteword and active.
      */
     @Test
-    public void testParseLineActiveWhiteword() {
+    public void testAddWordActiveWhiteword() {
         String word = "mockword";
         Boolean status = true;
         try {
             when(blackworddao.find(any(String.class))).thenReturn(false);
-            databaselistparser.parseLine(word, mockblacklist, mockId);
+            databaselistparser.addWord(word, mockblacklist, mockId);
             verify(whiteworddao).insert(wordCaptor.capture(), booleanCaptor.capture(), idCaptor.capture());
         } catch (SQLException ex) {
             fail("SQLException");
@@ -135,15 +122,15 @@ public class DatabaseListParserTest {
     }
 
     /**
-     * Test of the parseLine-method, when the word is a whiteword and not active.
+     * Test of the addWord-method, with a inactive whiteword.
      */
     @Test
-    public void testParseLineInactiveWhiteword() {
+    public void testAddWordInactiveWhiteword() {
         String word = "mockword";
         Boolean status = false;
         try {
             when(blackworddao.find(any(String.class))).thenReturn(true);
-            databaselistparser.parseLine(word, mockblacklist, mockId);
+            databaselistparser.addWord(word, mockblacklist, mockId);
             verify(whiteworddao).insert(wordCaptor.capture(), booleanCaptor.capture(), idCaptor.capture());
         } catch (SQLException ex) {
             fail("SQLException");
@@ -155,13 +142,13 @@ public class DatabaseListParserTest {
     }
 
     /**
-     * Test of the parseLine-method, when the word is a blackword.
+     * Test of the addWord-method, when the word is a blackword.
      */
     @Test
-    public void testParseLineBlackword() {
+    public void testAddWordBlackword() {
         String word = "mockword";
         try {
-            databaselistparser.parseLine(word, true, mockId);
+            databaselistparser.addWord(word, true, mockId);
             verify(blackworddao).insert(wordCaptor.capture(), idCaptor.capture());
         } catch (SQLException ex) {
             fail("SQLException");
@@ -170,6 +157,59 @@ public class DatabaseListParserTest {
         assertEquals(wordCaptor.getValue(), word);
         assertEquals(idCaptor.getValue(), mockId);
 
+    }
+
+    /**
+     * Test of the parseLine-method, when the word includes a
+     * non-ascii-character.
+     */
+    @Test
+    public void testParseLineNonASCII() {
+
+        String word = "mockword¤";
+        Boolean acceptable = true;
+        Boolean expectation = false;
+        try {
+            when(blackworddao.find(any(String.class))).thenReturn(false);
+            acceptable = databaselistparser.parseLine(word, mockblacklist, mockId, mockList);
+        } catch (SQLException ex) {
+            fail("SQLException");
+        }
+        assertEquals(acceptable, expectation);
+    }
+
+    /**
+     * Test of the parseLine-method, when the word is too long.
+     */
+    @Test
+    public void testParseLineTooLong() {
+        String word = "mockwordthatisfarlongerthanisallowed";
+        Boolean acceptable = true;
+        Boolean expectation = false;
+        try {
+            when(blackworddao.find(any(String.class))).thenReturn(false);
+            acceptable = databaselistparser.parseLine(word, mockblacklist, mockId, mockList);
+        } catch (SQLException ex) {
+            fail("SQLException");
+        }
+        assertEquals(acceptable, expectation);
+    }
+
+    /**
+     * Test of the parseLine-method, when the word is empty.
+     */
+    @Test
+    public void testParseEmptyLine() {
+        String word = "";
+        Boolean acceptable = true;
+        Boolean expectation = false;
+        try {
+            when(blackworddao.find(any(String.class))).thenReturn(false);
+            acceptable = databaselistparser.parseLine(word, mockblacklist, mockId, mockList);
+        } catch (SQLException ex) {
+            fail("SQLException");
+        }
+        assertEquals(acceptable, expectation);
     }
 
     /**
@@ -221,4 +261,39 @@ public class DatabaseListParserTest {
         }
         assertEquals(capturedList.get(0), "mock");
     }
+
+    /**
+     * Test of the isAsciiLetter-method. The method is tested with four
+     * ASCII-characters, each of which should not pass.
+     */
+    @Test
+    public void testIsAsciiLetterUnacceptable() {
+        char[] characters = {'@', '[', '`', '{'};
+        Boolean accepted;
+        Boolean expectation = false;
+        for (char i : characters) {
+            accepted = true;
+            accepted = databaselistparser.isAsciiLetter(i);
+            assertEquals(accepted, expectation);
+        }
+
+    }
+    
+        /**
+     * Test of the isAsciiLetter-method. The method is tested with four
+     * ASCII-characters, each of which should pass.
+     */
+    @Test
+    public void testIsAsciiLetterAcceptable() {
+        char[] characters = {'A', 'Z', 'a', 'z'};
+        Boolean accepted;
+        Boolean expectation = true;
+        for (char i : characters) {
+            accepted = false;
+            accepted = databaselistparser.isAsciiLetter(i);
+            assertEquals(accepted, expectation);
+        }
+
+    }
+
 }

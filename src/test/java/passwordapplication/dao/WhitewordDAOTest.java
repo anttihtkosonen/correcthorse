@@ -45,7 +45,7 @@ public class WhitewordDAOTest {
     JdbcTemplate jdbcTemplate;
 
     @InjectMocks
-    private WhitewordDAO whiteworddao = new WhitewordDAO();
+    final private WhitewordDAO whiteworddao = new WhitewordDAO();
 
     final private String mockword = "mockword";
     final private Boolean mockactive = true;
